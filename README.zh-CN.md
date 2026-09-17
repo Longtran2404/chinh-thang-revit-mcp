@@ -172,7 +172,7 @@ Bake 在 **Revit 进程内**用 Roslyn 编译 — 终端用户不需要 Visual S
 
 ### Toast（可选）
 
-完成 toast 默认**关闭**。用 ribbon **Toast**、配置里 `enableToast`，或 `BIMWRIGHT_ENABLE_TOAST=1` 打开。只显示**已完成**调用（无进行中 toast）。Capture 成功可在路径 allowlist 内显示缩略图。Ribbon **Status** 也会列出 toast 与 bake/隐私标志，避免靠猜。
+完成 toast 默认**开启**。用 ribbon **Toast**、配置里 `enableToast: false`，或 `BIMWRIGHT_ENABLE_TOAST=0` 关闭。只显示**已完成**调用（无进行中 toast）。Capture 成功可在路径 allowlist 内显示缩略图。Ribbon **Status** 也会列出 toast 与 bake/隐私标志，避免靠猜。
 
 ---
 
@@ -303,7 +303,7 @@ MCP 名：`revit_*`。server↔plugin 线名：无前缀 snake_case。
 | 缓存 send_code 正文（bake 聚类） | `--cache-send-code-bodies` / `--no-…` | `BIMWRIGHT_CACHE_SEND_CODE_BODIES=1` | `cacheSendCodeBodies` |
 | 持久化 send_code journal | `--persist-send-code-bodies` / `--no-…` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES=1` | `persistSendCodeBodies` |
 | Journal TTL | `--persist-send-code-bodies-for 4h` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES_TTL` | `persistSendCodeBodiesUntil` |
-| 完成 toast | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=1` | `enableToast` |
+| 完成 toast（默认开启） | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=0` | `enableToast` |
 
 改 server 标志后请重启 MCP 连接，以便客户端拿到新工具列表。
 

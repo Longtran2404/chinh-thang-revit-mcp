@@ -172,7 +172,7 @@ Bake のコンパイルは **Revit 内** Roslyn — エンドユーザーに Vis
 
 ### トースト（任意）
 
-完了トーストは既定**オフ**。リボン **Toast**、`enableToast`、または `BIMWRIGHT_ENABLE_TOAST=1` でオン。**完了後**のみ表示（進行中トーストなし）。Capture 成功時、パス allowlist 内ならサムネイル可。リボン **Status** にも toast と bake/プライバシー状態が出ます。
+完了トーストは既定**オン**。リボン **Toast**、`enableToast: false`、または `BIMWRIGHT_ENABLE_TOAST=0` でオフ。**完了後**のみ表示（進行中トーストなし）。Capture 成功時、パス allowlist 内ならサムネイル可。リボン **Status** にも toast と bake/プライバシー状態が出ます。
 
 ---
 
@@ -303,7 +303,7 @@ MCP 名は `revit_*`。server↔plugin ワイヤ名はプレフィックスな�
 | send_code 本体キャッシュ（bake クラスタ） | `--cache-send-code-bodies` / `--no-…` | `BIMWRIGHT_CACHE_SEND_CODE_BODIES=1` | `cacheSendCodeBodies` |
 | send_code journal 永続化 | `--persist-send-code-bodies` / `--no-…` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES=1` | `persistSendCodeBodies` |
 | Journal TTL | `--persist-send-code-bodies-for 4h` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES_TTL` | `persistSendCodeBodiesUntil` |
-| 完了トースト | リボン **Toast** | `BIMWRIGHT_ENABLE_TOAST=1` | `enableToast` |
+| 完了トースト（既定オン） | リボン **Toast** | `BIMWRIGHT_ENABLE_TOAST=0` | `enableToast` |
 
 サーバ側フラグ変更後は MCP 接続を再起動し、クライアントが新しいツール一覧を取るようにしてください。
 

@@ -172,7 +172,7 @@ Bake compile **trong Revit** qua Roslyn — end user không cần Visual Studio.
 
 ### Toast (tùy chọn)
 
-Toast hoàn thành trong Revit **tắt** mặc định. Bật bằng nút ribbon **Toast**, `enableToast` trong config, hoặc `BIMWRIGHT_ENABLE_TOAST=1`. Chỉ hiện call **đã xong** (không toast “đang chạy”). Capture thành công có thể có thumbnail nếu file trong path allowlist. Ribbon **Status** cũng in toast + cờ bake/privacy để khỏi đoán.
+Toast hoàn thành trong Revit **bật** mặc định. Tắt bằng nút ribbon **Toast**, `enableToast: false` trong config, hoặc `BIMWRIGHT_ENABLE_TOAST=0`. Chỉ hiện call **đã xong** (không toast “đang chạy”). Capture thành công có thể có thumbnail nếu file trong path allowlist. Ribbon **Status** cũng in toast + cờ bake/privacy để khỏi đoán.
 
 ---
 
@@ -303,7 +303,7 @@ Thêm: [SECURITY.md](SECURITY.md), [docs/bake.md](docs/bake.md).
 | Cache body send_code (cluster bake) | `--cache-send-code-bodies` / `--no-…` | `BIMWRIGHT_CACHE_SEND_CODE_BODIES=1` | `cacheSendCodeBodies` |
 | Journal persist send_code | `--persist-send-code-bodies` / `--no-…` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES=1` | `persistSendCodeBodies` |
 | TTL journal | `--persist-send-code-bodies-for 4h` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES_TTL` | `persistSendCodeBodiesUntil` |
-| Toast hoàn thành | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=1` | `enableToast` |
+| Toast hoàn thành (mặc định bật) | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=0` | `enableToast` |
 
 Đổi cờ server xong: restart kết nối MCP để client nhận tool list mới.
 

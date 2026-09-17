@@ -35,7 +35,7 @@ namespace RvtMcp.Plugin
         public const bool DefaultEnableToolbaker           = true;
         public const bool DefaultEnableAdaptiveBake        = false;
         public const bool DefaultCacheSendCodeBodies       = false;
-        public const bool DefaultEnableToast               = false;
+        public const bool DefaultEnableToast               = true;
         public const bool DefaultPersistSendCodeBodies     = false;
 
         [JsonProperty("target")]

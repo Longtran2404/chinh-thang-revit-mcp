@@ -172,7 +172,7 @@ Bake compile runs **inside Revit** via Roslyn — end users do not need Visual S
 
 ### Toast (optional)
 
-Completion toast in Revit is **off** by default. Turn on with the ribbon **Toast** button, `enableToast` in config, or `BIMWRIGHT_ENABLE_TOAST=1`. Only finished calls are shown (no “in progress” toast). Capture success can show a thumbnail when the file sits under the path allowlist. Ribbon **Status** also prints toast + bake/privacy flags so you can see what is enabled without guessing.
+Completion toast in Revit is **on** by default. Turn off with the ribbon **Toast** button, `enableToast: false` in config, or `BIMWRIGHT_ENABLE_TOAST=0`. Only finished calls are shown (no “in progress” toast). Capture success can show a thumbnail when the file sits under the path allowlist. Ribbon **Status** also prints toast + bake/privacy flags so you can see what is enabled without guessing.
 
 ---
 
@@ -303,7 +303,7 @@ Precedence, high wins: **CLI → env (`BIMWRIGHT_*`) →** `%LOCALAPPDATA%\RvtMc
 | Cache send_code bodies (bake clusters) | `--cache-send-code-bodies` / `--no-…` | `BIMWRIGHT_CACHE_SEND_CODE_BODIES=1` | `cacheSendCodeBodies` |
 | Persist send_code journal | `--persist-send-code-bodies` / `--no-…` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES=1` | `persistSendCodeBodies` |
 | Journal TTL | `--persist-send-code-bodies-for 4h` | `BIMWRIGHT_PERSIST_SEND_CODE_BODIES_TTL` | `persistSendCodeBodiesUntil` |
-| Completion toast | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=1` | `enableToast` |
+| Completion toast (default on) | ribbon **Toast** | `BIMWRIGHT_ENABLE_TOAST=0` | `enableToast` |
 
 After changing server flags, restart the MCP connection so the client picks up the new tool list.
 
