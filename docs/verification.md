@@ -2,7 +2,7 @@
 
 ## Automated and protocol checks
 
-- 487 unit tests passed, including strict material edit input validation.
+- 489 unit tests passed, including strict material edit input validation.
 - Revit 2024 add-in Release build: zero warnings, zero errors.
 - Self-contained Windows x64 server started without a separately installed runtime.
 - Real stdio MCP initialize and tools/list passed: identity `chinh-thang-revit-mcp`, version 1.0.0, 229 tools.

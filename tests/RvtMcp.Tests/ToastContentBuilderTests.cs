@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18: structured-result regression coverage.
 using RvtMcp.Plugin;
 using RvtMcp.Plugin.Views.Toast;
 using Xunit;
@@ -6,6 +7,16 @@ namespace RvtMcp.Tests
 {
     public class ToastContentBuilderTests
     {
+        [Theory]
+        [InlineData("{\"executed\":true,\"result\":{\"ok\":true}}")]
+        [InlineData("{\"executed\":true,\"result\":[1,2,3]}")]
+        public void BuildCompleted_send_code_accepts_structured_results(string result)
+        {
+            var vm = ToastContentBuilder.BuildCompleted("send_code_to_revit", null, result, true, null, 12, null);
+            Assert.Equal("Script finished", vm.Summary);
+            Assert.True(vm.Success);
+        }
+
         [Fact]
         public void BuildCompleted_get_current_view_info_includes_view_name()
         {

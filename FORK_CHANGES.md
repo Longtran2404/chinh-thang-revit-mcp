@@ -20,3 +20,5 @@ The Git history retains upstream authorship. Source files with edits carry chang
 - Updated golden tool-schema JSON snapshots for the four new optional material appearance arguments.
 
 - Prefer the installed Revit 2024 API assemblies; CI fallback targets 2024.0, avoiding an unnecessary 24.2 dependency on base 2024 installations.
+
+- Fixed completion notifications for C# scripts returning structured objects/arrays; added two regression tests.

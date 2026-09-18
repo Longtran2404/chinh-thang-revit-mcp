@@ -57,7 +57,7 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 487 unit tests, build Revit 2024, 229 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 489 unit tests, build Revit 2024, 229 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 

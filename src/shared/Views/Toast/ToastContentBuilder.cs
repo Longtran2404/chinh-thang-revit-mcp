@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18: support structured script results in completion notifications.
 using System;
 using System.IO;
 using Newtonsoft.Json.Linq;
@@ -202,7 +203,8 @@ namespace RvtMcp.Plugin.Views.Toast
 
         private static ToastContent BuildSendCodeSuccess(string category, JObject result)
         {
-            var text = result?.Value<string>("result");
+            var value = result?["result"];
+            var text = value?.Type == JTokenType.String ? value.Value<string>() : null;
             var summary = string.IsNullOrWhiteSpace(text) ? "Script finished" : Truncate(FirstLine(text), 100);
             return new ToastContent(category, summary, "Custom C# executed in Revit");
         }
