@@ -1,3 +1,11 @@
+## 1.2.0 — 2026-09-18
+
+- Explicit TCVN5574:2018 / EN1992-1-1:2004 anchorage and lap calculations with bounded scope and traceable inputs.
+- Project/region support density, native chairs, anchor toggles, native couplers, parallel/cranked lap components and physical I-section node analysis.
+- Architecture/MEP/HSE readiness audits and a persistent HSE issue register; verified in a scratch Revit model.
+- Fixed duplicate-bar failure during managed replacement; failed replacements restore the previous bars.
+- `--toolsets all` **244**, adaptive bake **247**. See docs/detailing-design.md for input contracts and limitations.
+
 ## Chinh Thang 1.1.0
 
 - Native bent Rebar paths, detailing catalog and detailed steel connection creation.

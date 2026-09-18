@@ -36,7 +36,7 @@ try:
     send({'method':'notifications/initialized'})
     result = call(2, 'tools/list', {})
     tools = result['tools']
-    assert len(tools) == 232, len(tools)
+    assert len(tools) == 244, len(tools)
     assert any(t['name']=='revit_get_current_view_info' for t in tools)
     assert any(t['name']=='revit_send_code_to_revit' for t in tools)
     print(json.dumps({'handshake':'PASS','server':init['serverInfo'],'tool_count':len(tools)},ensure_ascii=False))

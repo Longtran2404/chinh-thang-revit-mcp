@@ -49,7 +49,8 @@ namespace RvtMcp.Plugin.Handlers
             {
                 tx.Start();
                 // Never leave a modal failure dialog or a partially committed set.
-                tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetFailuresPreprocessor(new RebarPathFailures()).SetClearAfterRollback(true));
+                    var failures=new RebarPathFailures();
+                    tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetFailuresPreprocessor(failures).SetClearAfterRollback(true));
                 Rebar bar;
                 if (mode == "FreeForm")
                 {
@@ -78,7 +79,7 @@ namespace RvtMcp.Plugin.Handlers
                 }
                 doc.Regenerate();
                 var result = new { dry_run=dry, created_id=dry ? (long?)null : RevitCompat.GetId(bar.Id), host_id=RevitCompat.GetId(host.Id), bar_type_id=RevitCompat.GetId(barType.Id), mode, requested_layout=rule, quantity=bar.Quantity, distribution_length_mm=length, bend_diameter_mm=barType.StandardBendDiameter*304.8, native_type=bar.GetType().FullName, constraint_note=mode=="FreeForm" ? "Unconstrained free-form Rebar: edit geometry via RebarFreeFormAccessor.SetCurves; host-face constraints cannot be added later." : "Shape-driven native Rebar. Check/adjust host-face constraints in Revit.", design_check="Geometry only. Anchorage, laps, cover and clashes require project-specific review." };
-                if (tx.Commit()!=TransactionStatus.Committed) return CommandResult.Fail("Revit rolled back the requested geometry. Check host, bend diameters and segment lengths.");
+                if (tx.Commit()!=TransactionStatus.Committed) return CommandResult.Fail("Revit rolled back the requested geometry: "+string.Join("; ",failures.Messages));
                 if (dry) group.RollBack(); else group.Assimilate();
                 return CommandResult.Ok(result);
             }
@@ -95,10 +96,13 @@ namespace RvtMcp.Plugin.Handlers
 
     internal class RebarPathFailures : IFailuresPreprocessor
     {
+        public readonly List<string> Messages=new List<string>();
         public FailureProcessingResult PreprocessFailures(FailuresAccessor a)
         {
             // Roll back warnings too: success must not hide invalid geometry/constraints.
-            return a.GetFailureMessages().Count>0 ? FailureProcessingResult.ProceedWithRollBack : FailureProcessingResult.Continue;
+            var failures=a.GetFailureMessages();
+            Messages.AddRange(failures.Select(m=>m.GetDescriptionText()));
+            return failures.Count>0 ? FailureProcessingResult.ProceedWithRollBack : FailureProcessingResult.Continue;
         }
     }
 }

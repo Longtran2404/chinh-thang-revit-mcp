@@ -44,3 +44,12 @@ During initial diagnosis, a call while Revit was still on Home correctly reporte
 - Actual MCP calls passed catalog inspection and a bent-rebar dry-run. Invalid detailed steel connection type was rejected without fallback. Live current-view read and all 232 tools passed on the installed 1.1 server.
 - GitHub Actions build/test/package/stdio checks passed for the detailing implementation commit ee6e3d5.
 - Detailed steel connection fabrication geometry and capacity are not verified by creating a native handler. Loaded connection types and the Autodesk service are required.
+
+
+## Version 1.2 — 2026-09-18, architecture / MEP / HSE
+
+- 545 unit tests passed (including calculation/layout and HSE record validation). Revit 2024 API 24.0 Release build: 0 warnings / 0 errors.
+- Installed local server identity 1.2.0, 244 tools; real stdio resource read and live current-view read passed.
+- `scripts/verify-discipline-live.cs` creates only a separate scratch document. Live checks passed: two floor boundary rings / eight edges for a floor with one opening, unplaced room detection, audit truncation, a pipe with two open physical ends and 1% geometric slope, refusal of resolution without evidence, and HSE register save/reopen with one retained revision.
+- Actual typed MCP calls passed for all three discipline audits and HSE register listing. The fixture is intentionally small; this does not establish completeness on linked, phased or large production models, family flex, code compliance, HVAC/hydraulic/electrical design or site safety.
+- Version 1.2 rebar calculation tests passed for the explicitly bounded TCVN5574:2018 and EN1992-1-1:2004 profiles. `scripts/verify-designed-rebar-live.cs` passed on the installed DLL: net slab area 29 m² excluding one opening, 8 planar chairs for the fixture input 4 m²/chair, clean dry-run, repeat-region replacement without duplicates, failed replacement restoring all original supports, two downward anchors with actual rounded path length 4070 mm (3000 mm body + 2 × 535 mm), independent start-anchor toggle, 640 mm straight overlap after the rounded crank, and save/reopen of 13 Rebar sets. These fixture dimensions are not project design defaults. Positive native coupler creation and smart I-node connection creation remain unverified and experimental. Spatial/ZigzagRail density layouts also need separate runtime cases; the verified region case uses PlanarChair. Steel connection capacity and actual plate centering are not certified.

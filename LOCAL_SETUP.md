@@ -8,7 +8,7 @@ Cần Windows, Revit 2024 và .NET 8 SDK. Mở PowerShell tại thư mục sourc
 powershell -ExecutionPolicy Bypass -File scripts/build-local.ps1
 ```
 
-Script chạy test, build add-in và tạo server độc lập trong `artifacts/ChinhThangRevitMcp-1.1.0-win-x64/`, kèm ZIP và SHA-256. Máy sử dụng bộ ZIP không cần .NET SDK. Không phân phối Revit API DLL, mô hình hay khóa truy cập.
+Script chạy test, build add-in và tạo server độc lập trong `artifacts/ChinhThangRevitMcp-1.2.0-win-x64/`, kèm ZIP và SHA-256. Máy sử dụng bộ ZIP không cần .NET SDK. Không phân phối Revit API DLL, mô hình hay khóa truy cập.
 
 ## Cài trên máy
 
@@ -42,7 +42,7 @@ python scripts/smoke-test.py "$env:LOCALAPPDATA\ChinhThangRevitMcp\app\server\Rv
 python scripts/smoke-test.py "$env:LOCALAPPDATA\ChinhThangRevitMcp\app\server\RvtMcp.Server.exe" --live
 ```
 
-Lệnh đầu kiểm tra handshake và 232 tools. Lệnh `--live` phải trả về view thực trong Revit mới chứng minh kết nối đầu cuối hoạt động. Việc build/test thành công không thay thế bước này.
+Lệnh đầu kiểm tra handshake và 244 tools. Lệnh `--live` phải trả về view thực trong Revit mới chứng minh kết nối đầu cuối hoạt động. Việc build/test thành công không thay thế bước này.
 
 MCP này chạy cục bộ, không yêu cầu khóa API của nhà cung cấp AI. AI client bạn chọn vẫn sử dụng cơ chế tài khoản riêng của client. Adaptive bake mặc định tắt; muốn tự động rút gọn code cần tự cung cấp implementation `ICodeCondenser`.
 

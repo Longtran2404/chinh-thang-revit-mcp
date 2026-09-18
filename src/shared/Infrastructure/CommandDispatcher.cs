@@ -13,6 +13,10 @@ namespace RvtMcp.Plugin
         {
             _runtimeCache = runtimeCache;
             Register(new Handlers.ShowMessageHandler());
+            Register(new Handlers.DisciplineReadinessHandler("architecture"));
+            Register(new Handlers.DisciplineReadinessHandler("mep"));
+            Register(new Handlers.DisciplineReadinessHandler("hse"));
+            Register(new Handlers.HseIssueRegisterHandler());
             Register(new Handlers.GetCurrentViewHandler());
             Register(new Handlers.GetSelectedElementsHandler());
             Register(new Handlers.GetFamilyTypesHandler());
@@ -259,6 +263,14 @@ namespace RvtMcp.Plugin
             // Wave 16: Rebar Creation (deferred from Wave 14)
             Register(new Handlers.CreateRebarSetHandler());
             Register(new Handlers.CreateRebarPathHandler());
+            Register(new Handlers.CreateRebarCouplerHandler());
+            Register(new Handlers.GetDetailingProfileHandler());
+            Register(new Handlers.SetDetailingProfileHandler());
+            Register(new Handlers.CreateSlabSupportsHandler());
+            Register(new Handlers.CreateDesignedRebarHandler());
+            Register(new Handlers.CreateRebarSpliceHandler());
+            Register(new Handlers.CreateSmartSteelNodeHandler());
+
             Register(new Handlers.GetDetailingCatalogHandler());
             Register(new Handlers.CreateSteelConnectionHandler());
             Register(new Handlers.CreateRebarStirrupHandler());

@@ -248,7 +248,7 @@ namespace RvtMcp.Server
             {
                 Name = "chinh-thang-revit-mcp",
                 Title = "Chinh Thang Revit MCP",
-                Version = "1.1.0",
+                Version = "1.2.0",
                 Description = "Model Context Protocol gateway for Autodesk Revit 2022-2027",
                 WebsiteUrl = "https://github.com/Longtran2404/chinh-thang-revit-mcp"
             };
@@ -2434,6 +2434,66 @@ Start with revit_get_current_view_info. Multiple sessions: revit_list_available_
     [McpServerToolType, Toolset("structural")]
     public class StructuralTools
     {
+        [McpServerTool(Name = "revit_calculate_rebar_detailing", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Calculate bounded non-prestressed TCVN5574:2018 or EN1992-1-1:2004 anchorage/lap lengths with explicit design strengths, bar surface/stress, nominal diameter, required/provided steel areas, end shape, concrete kind and splice percentage. Returns clauses, coefficients, minima, bend diameter and remaining checks. Input design_json; other standards are rejected until implemented, never silently substituted.")]
+        public static string CalculateRebarDetailing(string design_json)
+        {
+            try { return RvtMcp.Plugin.DetailingDesign.Calculate(Newtonsoft.Json.Linq.JObject.Parse(design_json)).ToString(); }
+            catch(Exception ex) { return "Error: " + ex.Message; }
+        }
+        [McpServerTool(Name = "revit_get_detailing_profile", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Read document-local detailing settings, support density/spacing and steel connection rules. No guessed density or strength defaults.")]
+        public static async Task<string> GetDetailingProfile()
+        {
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("get_detailing_profile", new {}), Formatting.Indented); }
+            catch(Exception ex) { return "Error: " + ex.Message; }
+        }
+        [McpServerTool(Name = "revit_create_rebar_coupler"), System.ComponentModel.Description("Create native RebarCoupler between two explicit bar ends (0/1), using an actual loaded coupler family type. Revit validates alignment, diameters, engagement and distributions; dry_run commits validation then rolls back. Does not certify manufacturer capacity.")]
+        public static async Task<string> CreateRebarCoupler(long type_id,long first_rebar_id,int first_end,long second_rebar_id,int second_end,bool dry_run=true)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_rebar_coupler");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_rebar_coupler",new {type_id,first_rebar_id,first_end,second_rebar_id,second_end,dry_run}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_set_detailing_profile"), System.ComponentModel.Description("Save explicit document-local support_layout (area_per_support_m2 OR spacing_x_mm and spacing_y_mm) and steel_connection_rules (BeamToColumn/BeamToBeam/Splice mapped to loaded type IDs).")]
+        public static async Task<string> SetDetailingProfile(string profile_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("set_detailing_profile");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("set_detailing_profile",new {profile_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_slab_supports"), System.ComponentModel.Description("Place native PlanarChair, SpatialChair or ZigzagRail on a planar horizontal Floor. JSON: host_id, upper_rebar_id, lower_rebar_id, bar_type_id, kind, zone_key, seat_width_mm, foot_length_mm, optional seat_depth_mm, layout or saved profile, optional zone_box_mm [minX,minY,maxX,maxY], dry_run. Uses net area excluding openings; repeated zone_key replaces only owned supports. No default density.")]
+        public static async Task<string> CreateSlabSupports(string request_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_slab_supports");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_slab_supports",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_designed_rebar"), System.ComponentModel.Description("Create native shape-driven Rebar with calculated end anchorage using an explicit implemented standard. JSON: host_id,bar_type_id,body_points_json at critical sections,normal_x/y/z,design,start_anchor/end_anchor {enabled,style Straight|Up|Down,horizontal_embedment_mm}, layout options,dry_run. replace_component_id reuses stored recipe for toggles; refuses unmanaged bars. Disabled anchors are explicitly flagged for design review.")]
+        public static async Task<string> CreateDesignedRebar(string request_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_designed_rebar");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_designed_rebar",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_rebar_splice"), System.ComponentModel.Description("Create a two-bar ParallelLap or CrankedLap beam splice using calculated lap length using an explicit implemented standard. JSON: mode,host_id,bar_type_id,start_mm,end_mm,splice_center_mm,offset_direction,centerline_offset_mm,crank_run_mm if cranked,design,dry_run. No removal of existing bars; new native bars are tagged with their component recipe. Pressed/reduced mechanical ends are not bent-bar geometry.")]
+        public static async Task<string> CreateRebarSplice(string request_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_rebar_splice");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_rebar_splice",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_smart_steel_node"), System.ComponentModel.Description("Analyze physical centroid axes of two straight I-section members and optionally create native detailed connection from project rules. JSON: primary_id,secondary_id,node_tolerance_mm,analyze_only=true,connection_type_id optional,dry_run=true. Uses actual solid sections for offsets/rotation. Rejects missing service/type or uncertain axes. Plate geometry/capacity requires review; not automatic structural design.")]
+        public static async Task<string> CreateSmartSteelNode(string request_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_smart_steel_node");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_smart_steel_node",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
         [McpServerTool(Name = "revit_create_rebar_path"), System.ComponentModel.Description("Create native bent Rebar for L/U/Z anchorage, stair zigzags, slab-to-beam bent ends and chairs. points_json is an array of 2-128 centreline [x,y,z] vertices in mm, including explicit anchorage legs; bends use the chosen bar type. ShapeDriven requires a planar path perpendicular to normal; FreeForm supports spatial chairs, uses normal as distribution direction, and is unconstrained (no later host-face constraints). Explicit host/type required. Single quantity=1; FixedNumber quantity>=2 + distribution_length_mm; MaximumSpacing spacing_mm + distribution_length_mm (quantity=1). Positive normal controls distribution side. No automatic cover/anchorage/capacity design. dry_run rolls back. Read docs/rebar-detailing.md.")]
         public static async Task<string> CreateRebarPath(long host_id, long bar_type_id, string points_json, double normal_x, double normal_y, double normal_z, string mode = "ShapeDriven", string layout_rule = "Single", int quantity = 1, double distribution_length_mm = 0, double spacing_mm = 0, bool dry_run = false)
         {
@@ -3939,6 +3999,25 @@ Start with revit_get_current_view_info. Multiple sessions: revit_list_available_
     [McpServerToolType, Toolset("workflows")]
     public class WorkflowsTools
     {
+        [McpServerTool(Name = "revit_audit_architecture_readiness", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Read-only architecture review: room placement/enclosure, editable versus in-place families, door/window hosts and missing material appearance. Optional element_ids, limit 1-500. Reports observations, not family flex or building-code certification. Current document only.")]
+        public static async Task<string> AuditArchitectureReadiness(long[] element_ids = null, int limit = 100)
+        { try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("audit_architecture_readiness",new {element_ids,limit}),Formatting.Indented); } catch(Exception ex) {return "Error: "+ex.Message;} }
+
+        [McpServerTool(Name = "revit_audit_mep_readiness", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Read-only MEP review: physical end connectors, actual sizes, connection status, system membership and absolute geometric slope of straight runs. Optional element_ids, limit 1-500. Open ends are review candidates, not automatically faults; slope does not establish flow direction. No hydraulic, HVAC or electrical sizing certification.")]
+        public static async Task<string> AuditMepReadiness(long[] element_ids = null, int limit = 100)
+        { try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("audit_mep_readiness",new {element_ids,limit}),Formatting.Indented); } catch(Exception ex) {return "Error: "+ex.Message;} }
+
+        [McpServerTool(Name = "revit_audit_hse_readiness", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Extract floor top-face boundary review candidates, including perimeter/opening rings, segment endpoints/lengths and construction phase IDs. Optional floor element_ids, limit 1-500. Does NOT establish unprotected edges, drop heights, guardrail adequacy, site conditions or HSE compliance. Linked models excluded; curved boundaries reported by type, not flattened into straight geometry.")]
+        public static async Task<string> AuditHseReadiness(long[] element_ids = null, int limit = 100)
+        { try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("audit_hse_readiness",new {element_ids,limit}),Formatting.Indented); } catch(Exception ex) {return "Error: "+ex.Message;} }
+
+        [McpServerTool(Name = "revit_hse_issue_register"), System.ComponentModel.Description("Local RVT HSE register. action list or upsert. issue_json for upsert: issue_key,title,hazard FallEdge|FloorOpening|Access|Lifting|Electrical|Fire|Other,status Open|InProgress|Resolved,element_ids (explicit array),owner,reviewer,evidence,notes,due_date yyyy-MM-dd. Resolved requires owner/reviewer/evidence; records declarations, not independently verified safety. Retains 20 revisions, up to 500 issues. No external messages sent.")]
+        public static async Task<string> HseIssueRegister(string action = "list", string issue_json = null, int start = 0, int limit = 100)
+        {
+            if(action!="list"){var blocked=ServerState.BlockIfReadOnly("hse_issue_register");if(blocked!=null)return blocked;}
+            try{return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("hse_issue_register",new {action,issue_json,start,limit}),Formatting.Indented);}catch(Exception ex){return "Error: "+ex.Message;}
+        }
+
         [McpServerTool(Name = "revit_workflow_clash_review", Destructive = false), System.ComponentModel.Description("Run clash detection, optionally create a review view, color clash hits, and add review markers with an auditable workflow report.")]
         public static async Task<string> WorkflowClashReview(string category_a, string category_b, long? view_id = null, int max_pairs = 200, bool create_review_view = true, bool color_hits = true, bool create_markers = false, bool dry_run = true, bool continue_on_error = false)
         {

@@ -15,7 +15,7 @@
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>chinh-thang-revit-mcp</ToolCommandName>
     <PackageId>ChinhThang.RevitMcp.Server</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.2.0</Version>
     <Authors>Minh Long Tran;Khoa Le (upstream)</Authors>
     <Description>MCP gateway for Autodesk Revit 2022-2027 — expose the Revit API as AI-callable tools with progressive disclosure (toolset gating), a Transaction-safe batch_execute, and a ToolBaker self-evolution engine. Pair with the Revit plugin distributed on GitHub Releases.</Description>
     <PackageProjectUrl>https://github.com/Longtran2404/chinh-thang-revit-mcp</PackageProjectUrl>
@@ -30,6 +30,11 @@
   <ItemGroup>
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
     <EmbeddedResource Include="..\..\docs\native-modeling-policy.md" LogicalName="ChinhThang.NativeModelingPolicy.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\shared\Infrastructure\DetailingDesign.cs" Link="Shared\DetailingDesign.cs" />
+    <Compile Include="..\shared\Infrastructure\SlabSupportLayout.cs" Link="Shared\SlabSupportLayout.cs" />
   </ItemGroup>
 
   <!-- Shared config (A9) — pulled in as source so server binary has zero extra deps -->

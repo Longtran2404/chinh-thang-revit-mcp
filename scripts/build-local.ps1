@@ -17,7 +17,7 @@ function Invoke-Dotnet([string[]]$Arguments) {
 }
 Push-Location $root
 try {
-    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.1.0-win-x64'
+    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.2.0-win-x64'
     if (Test-Path -LiteralPath $package) {
         # Do not mix old and new build outputs; keep the previous package intact.
         Move-Item -LiteralPath $package -Destination ($package + '.previous-' + (Get-Date -Format 'yyyyMMddHHmmssfff'))
@@ -35,6 +35,8 @@ try {
     if (-not (Test-Path $native)) { throw 'Missing native SQLite dependency.' }
     Copy-Item -LiteralPath $native -Destination $plugin.FullName
     Copy-Item 'scripts/install-local.ps1', 'scripts/smoke-test.py', 'LICENSE', 'NOTICE', 'FORK_CHANGES.md', 'LOCAL_SETUP.md' -Destination $package
+    $guideDirectory = New-Item -ItemType Directory -Path "$package\docs" -Force
+    Copy-Item 'docs/architecture-mep-hse.md', 'docs/detailing-design.md', 'docs/native-modeling-policy.md', 'docs/rebar-detailing.md', 'docs/material-appearance.md', 'docs/verification.md' -Destination $guideDirectory.FullName
     $hashes = Get-ChildItem $package -Recurse -File | ForEach-Object {
         [ordered]@{ path = $_.FullName.Substring($package.Length + 1); sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
     }

@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 15,
+  "tool_count": 23,
   "tools": [
     {
       "name": "revit_analyze_structural_connections",
@@ -17,6 +17,38 @@
           }
         },
         "required": [],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_calculate_rebar_detailing",
+      "description_hash": "sha256:71822ca632336bca452b2c075c26b4b75f944d8cd530d7ff311d7d31e05ebe2d",
+      "inputSchema": {
+        "properties": {
+          "design_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "design_json"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_designed_rebar",
+      "description_hash": "sha256:eb54dc30af9deeb1f1c1758180dfb9c7c83ce6eb9c12d5eb8814c1f04c62c77b",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
+        ],
         "type": "object"
       }
     },
@@ -89,6 +121,46 @@
         },
         "required": [
           "wall_id"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_rebar_coupler",
+      "description_hash": "sha256:57b716ef759a118326318d265fc11a9a365cfcfe2e1a536b4c651a8662392a5e",
+      "inputSchema": {
+        "properties": {
+          "dry_run": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "first_end": {
+            "description": "",
+            "type": "Int32"
+          },
+          "first_rebar_id": {
+            "description": "",
+            "type": "Int64"
+          },
+          "second_end": {
+            "description": "",
+            "type": "Int32"
+          },
+          "second_rebar_id": {
+            "description": "",
+            "type": "Int64"
+          },
+          "type_id": {
+            "description": "",
+            "type": "Int64"
+          }
+        },
+        "required": [
+          "type_id",
+          "first_rebar_id",
+          "first_end",
+          "second_rebar_id",
+          "second_end"
         ],
         "type": "object"
       }
@@ -225,6 +297,22 @@
       }
     },
     {
+      "name": "revit_create_rebar_splice",
+      "description_hash": "sha256:8a22534eb197974941a9ec147a740776b066bb8d645b7bf221ea4c5e460b52e2",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
+        ],
+        "type": "object"
+      }
+    },
+    {
       "name": "revit_create_rebar_stirrup",
       "description_hash": "sha256:86497c7af5675099791ac2390124b1999bc8c72bdee689441137c6bf077313ff",
       "inputSchema": {
@@ -291,6 +379,38 @@
           "origin_x_mm",
           "origin_y_mm",
           "origin_z_mm"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_slab_supports",
+      "description_hash": "sha256:fbe0a45b0f89ca5081c5ddf8dcbf802184cd16c1c813f93886fb69c666b3b314",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_smart_steel_node",
+      "description_hash": "sha256:86029f44611be0fa685f36bd637ed9b9b8ab169884d08b96c6592b36a80e3ba9",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
         ],
         "type": "object"
       }
@@ -491,6 +611,15 @@
       }
     },
     {
+      "name": "revit_get_detailing_profile",
+      "description_hash": "sha256:e1bdfba9232faece8ace2771895d75b80243b24a8e03422dc1e741e680424de2",
+      "inputSchema": {
+        "properties": {},
+        "required": [],
+        "type": "object"
+      }
+    },
+    {
       "name": "revit_get_structural_loads",
       "description_hash": "sha256:e391b349d9c7b852d999be55ca31ebbf2a64240c3d9e412b265bdd065cc2b5fb",
       "inputSchema": {
@@ -531,6 +660,22 @@
           }
         },
         "required": [],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_set_detailing_profile",
+      "description_hash": "sha256:567be9ac5d2667923017954cb255def62c5e9c5d2036b67d2bf3bc7b70ec61fe",
+      "inputSchema": {
+        "properties": {
+          "profile_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "profile_json"
+        ],
         "type": "object"
       }
     },

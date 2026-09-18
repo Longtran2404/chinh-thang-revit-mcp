@@ -28,3 +28,6 @@ The Git history retains upstream authorship. Source files with edits carry chang
 - Documented FreeForm host-constraint limitations and the distinction between geometry generation and engineering design checks.
 
 - Added an explicit top-slab inverted-U example with both anchorage legs downward, an additional input test, and live endpoint-elevation checks before/after save/reopen.
+
+- Version 1.2: explicit bounded TCVN/EC2 rebar calculations, project/region support settings, anchorage recipes, native couplers, lap pairs and I-member centroid node tools. Calculation/layout unit tests passed; see verification.md for native runtime limitations.
+- Added four architecture/MEP/HSE workflow tools, including a document-local HSE register with validation, revision retention and pagination. Revit scratch-model checks and typed MCP calls passed. Current surface: 244 standard / 247 adaptive tools.

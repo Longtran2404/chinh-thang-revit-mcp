@@ -22,9 +22,10 @@ namespace RvtMcp.Plugin.Handlers
             var host=hostId.HasValue ? doc.GetElement(RevitCompat.ToElementId(hostId.Value)) : null;
             return CommandResult.Ok(new {
                 host_id=hostId, valid_rebar_host=host!=null && RebarHostData.IsValidHost(host),
-                bar_types=new FilteredElementCollector(doc).OfClass(typeof(RebarBarType)).Cast<RebarBarType>().Take(500).Select(t=>new { id=RevitCompat.GetId(t.Id),name=t.Name,model_diameter_mm=t.get_Parameter(BuiltInParameter.REBAR_MODEL_BAR_DIAMETER)?.AsDouble()*304.8,bend_diameter_mm=t.StandardBendDiameter*304.8 }).ToArray(),
+                bar_types=new FilteredElementCollector(doc).OfClass(typeof(RebarBarType)).Cast<RebarBarType>().Take(500).Select(t=>new { id=RevitCompat.GetId(t.Id),name=t.Name,nominal_diameter_mm=t.get_Parameter(BuiltInParameter.REBAR_BAR_DIAMETER)?.AsDouble()*304.8,model_diameter_mm=t.get_Parameter(BuiltInParameter.REBAR_MODEL_BAR_DIAMETER)?.AsDouble()*304.8,bend_diameter_mm=t.StandardBendDiameter*304.8 }).ToArray(),
                 cover_types=new FilteredElementCollector(doc).OfClass(typeof(RebarCoverType)).Cast<RebarCoverType>().Take(500).Select(t=>new {id=RevitCompat.GetId(t.Id),name=t.Name,distance_mm=t.CoverDistance*304.8}).ToArray(),
                 connection_types=new FilteredElementCollector(doc).OfClass(typeof(StructuralConnectionHandlerType)).Cast<StructuralConnectionHandlerType>().Take(500).Select(t=>new {id=RevitCompat.GetId(t.Id),name=t.Name,detailed=t.IsDetailed(),generic=t.IsGeneric(),custom=t.IsCustom()}).ToArray(),
+                coupler_types=new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Coupler).WhereElementIsElementType().Take(500).Select(t=>new {id=RevitCompat.GetId(t.Id),name=t.Name}).ToArray(),
                 limit_per_category=500,
                 design_note="Use explicit project dimensions. This catalog does not calculate anchorage, laps or structural capacity."
             });

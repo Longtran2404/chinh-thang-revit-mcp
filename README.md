@@ -1,7 +1,7 @@
 <!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Chính Thắng Revit MCP
 
-![MCP tools](https://img.shields.io/badge/MCP-232%20tools-blue)
+![MCP tools](https://img.shields.io/badge/MCP-244%20tools-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
 MCP chạy cục bộ để kết nối AI client với Autodesk Revit. Bản riêng của **Minh Long Tran / Chính Thắng**, phát triển từ [bimwright/rvt-mcp](https://github.com/bimwright/rvt-mcp).
@@ -38,8 +38,8 @@ Xem thêm [material/PBR](docs/material-appearance.md) và [toàn bộ quy trình
 | Chế độ | Số tools | Ghi chú |
 |---|---:|---|
 | Mặc định | **40** | query, create, view, meta |
-| `--toolsets all` | **232** | Bộ cài bản riêng dùng chế độ này |
-| `all` + adaptive bake | **235** | Thêm quản lý gợi ý; mặc định tắt |
+| `--toolsets all` | **244** | Bộ cài bản riêng dùng chế độ này |
+| `all` + adaptive bake | **247** | Thêm quản lý gợi ý; mặc định tắt |
 
 Dùng `--read-only` nếu chỉ muốn đọc. Đơn vị chiều dài tại biên MCP là mm. AI client vẫn có thể gửi nội dung tool cho dịch vụ AI mà bạn đang sử dụng.
 
@@ -57,7 +57,7 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 510 unit tests, build Revit 2024, 232 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 545 unit tests, build Revit 2024, 244 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 
@@ -70,3 +70,9 @@ Xem [kết quả kiểm chứng](docs/verification.md): 510 unit tests, build Re
 Bản 1.1 bổ sung Rebar nhiều đoạn cho neo, cầu thang gấp khúc, sàn bẻ đầu và chân kê/chân chó; danh mục detailing và tạo native detailed steel connection. Xem [cách dùng và giới hạn](docs/rebar-detailing.md).
 
 Đã kiểm tra trực tiếp năm dạng thép trong Revit 2024: cung uốn, sửa bộ thép/chân chó, rollback và lưu/mở lại 5 bộ gồm 24 thanh. Đây là thử hình học trên host bê tông riêng, chưa phải kiểm tra thiết kế neo qua nút sàn–dầm.
+
+## Kiến trúc, MEP và HSE — bản 1.2
+
+Đã thêm kiểm tra phòng/family/vật liệu, connector và độ dốc MEP, biên sàn/lỗ mở cần kiểm tra HSE, cùng sổ xử lý HSE lưu trong RVT. Bốn công cụ đã được thử trực tiếp trên mô hình riêng trong Revit 2024. Xem [phạm vi và cách dùng](docs/architecture-mep-hse.md). Đây là công cụ rà soát BIM, chưa phải bộ thiết kế hoặc chứng nhận an toàn đầy đủ.
+
+Phần neo/nối theo tiêu chuẩn và component kết cấu mới có phạm vi giới hạn; xem [hướng dẫn](docs/detailing-design.md) và [trạng thái kiểm chứng](docs/verification.md).
