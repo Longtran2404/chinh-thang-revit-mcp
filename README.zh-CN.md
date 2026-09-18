@@ -378,7 +378,9 @@ pwsh scripts/stage-plugin-zip.ps1 -Config Release
 
 ## bimwright
 
-同一套 AEC 宿主风格：
+连接 AI 助手与 BIM、CAD 应用的开源工具。
+
+**bimwright** 这个名字由 **BIM** 和 **wright** 组成。wright 是英语中表示制作者或建造者的旧词，如 *shipwright*（造船工）。
 
 - [rvt-mcp](https://github.com/bimwright/rvt-mcp) — Revit  
 - [dwg-mcp](https://github.com/bimwright/dwg-mcp) — AutoCAD  

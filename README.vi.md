@@ -378,7 +378,9 @@ Dùng được, không thần thánh. CI build 6 shell + test server. Runtime s�
 
 ## bimwright
 
-Cùng house style trên các host AEC:
+Các công cụ mã nguồn mở kết nối trợ lý AI với ứng dụng BIM và CAD.
+
+Tên **bimwright** ghép **BIM** với **wright**, một từ tiếng Anh cổ chỉ người thợ chế tạo hoặc xây dựng — như trong *shipwright* (thợ đóng tàu).
 
 - [rvt-mcp](https://github.com/bimwright/rvt-mcp) — Revit  
 - [dwg-mcp](https://github.com/bimwright/dwg-mcp) — AutoCAD  

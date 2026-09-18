@@ -378,7 +378,9 @@ Usable, not sacred. CI builds the six plugin shells and server tests. Runtime co
 
 ## bimwright
 
-Same house style across AEC hosts:
+Open-source tools connecting AI assistants to BIM and CAD applications.
+
+The name **bimwright** combines **BIM** with **wright**, an old word for a maker or builder—as in *shipwright*.
 
 - [rvt-mcp](https://github.com/bimwright/rvt-mcp) — Revit  
 - [dwg-mcp](https://github.com/bimwright/dwg-mcp) — AutoCAD  

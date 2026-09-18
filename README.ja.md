@@ -378,7 +378,9 @@ pwsh scripts/stage-plugin-zip.ps1 -Config Release
 
 ## bimwright
 
-同じハウススタイルの AEC ホスト群：
+AI アシスタントと BIM・CAD アプリケーションをつなぐオープンソースのツール。
+
+**bimwright** は **BIM** と **wright** を組み合わせた名前です。wright は、ものを作る人や建てる人を表す古い英語で、*shipwright*（船大工）などに使われます。
 
 - [rvt-mcp](https://github.com/bimwright/rvt-mcp) — Revit  
 - [dwg-mcp](https://github.com/bimwright/dwg-mcp) — AutoCAD  
