@@ -55,6 +55,10 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 - `scripts/install-local.ps1`: cài bản riêng và thêm cấu hình Codex tùy chọn.
 - `scripts/smoke-test.py`: kiểm tra giao thức thật; thêm `--live` để kiểm tra Revit.
 
+## Kiểm tra
+
+Xem [kết quả kiểm chứng](docs/verification.md): 487 unit tests, build Revit 2024, 229 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+
 ## Giấy phép và nguồn gốc
 
 [Apache-2.0](LICENSE). Giữ bản quyền upstream của Khoa Le, xem [NOTICE](NOTICE) và [các thay đổi của bản riêng](FORK_CHANGES.md).

@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18: build against the installed Revit API when available. -->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -7,12 +8,18 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <LangVersion>latest</LangVersion>
     <DefineConstants>REVIT2024;REVIT2024_OR_GREATER</DefineConstants>
+    <RevitApiDir Condition="'$(RevitApiDir)' == '' and Exists('C:\Program Files\Autodesk\Revit 2024\RevitAPI.dll')">C:\Program Files\Autodesk\Revit 2024</RevitApiDir>
   </PropertyGroup>
 
   <!-- Revit 2024 API via Nice3point NuGet packages -->
-  <ItemGroup>
-    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2024.2.0" PrivateAssets="all" />
-    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2024.2.0" PrivateAssets="all" />
+  <ItemGroup Condition="'$(RevitApiDir)' == ''">
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPI" Version="2024.0.0" PrivateAssets="all" />
+    <PackageReference Include="Nice3point.Revit.Api.RevitAPIUI" Version="2024.0.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(RevitApiDir)' != ''">
+    <Reference Include="RevitAPI"><HintPath>$(RevitApiDir)\RevitAPI.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="RevitAPIUI"><HintPath>$(RevitApiDir)\RevitAPIUI.dll</HintPath><Private>false</Private></Reference>
   </ItemGroup>
 
   <ItemGroup>
