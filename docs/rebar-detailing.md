@@ -44,3 +44,11 @@ Thay host/type và toàn bộ tọa độ bằng dữ liệu dự án. Các kíc
 - Chân chó không gian: `[[0,0,0],[200,0,0],[200,0,200],[200,400,200],[200,400,0],[400,400,0]]`, mode `FreeForm`.
 
 Thanh neo qua vùng sàn–dầm vẫn có **một host chính**; phải kiểm tra vùng giao và khả năng chỉnh host thực tế. Chưa có tự động dò mặt để phân phối thép toàn bộ tầng, thiết kế neo/nối theo tiêu chuẩn, chia vùng gối/nhịp, kiểm tra va chạm giữa mọi thanh, hoặc tự động triển khai bản vẽ gia công. Phải kiểm tra các bước này riêng trước khi phát hành.
+
+## Thép mũ sàn lớp trên: hai đầu bẻ xuống
+
+Phải đặt đoạn nằm ngang tại cao độ **lớp thép trên**, hai chân neo có cao độ thấp hơn. Không dùng mẫu U bẻ lên của lớp dưới cho thép mũ.
+
+Ví dụ thử hình học: `[[500,-1000,1600],[500,-1000,2000],[3500,-1000,2000],[3500,-1000,1600]]`, `ShapeDriven`, normal `[0,1,0]`. Đoạn ngang ở Z=2000 mm; hai đầu ở Z=1600 mm nên đều bẻ xuống 400 mm. Đây là kích thước minh họa, không phải chiều dài neo mặc định. Khi triển khai thật phải lấy cao độ tim thanh theo mặt sàn, lớp bảo vệ, đường kính và lớp thép giao nhau; chiều dài chân bẻ phải theo chi tiết thiết kế và kiểm tra có đủ không gian trong dầm.
+
+Bài thử live xác nhận cả hai đầu thấp hơn đoạn ngang trước và sau khi lưu/mở lại mô hình.

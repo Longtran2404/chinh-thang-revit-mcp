@@ -26,3 +26,5 @@ The Git history retains upstream authorship. Source files with edits carry chang
 - Version 1.1: added explicit native bent-rebar path authoring (planar and spatial), bounded distributions, real commit validation inside reversible dry-run groups, detailing type inspection and detailed steel connection creation without generic fallback.
 - Added 20 geometry/layout validation cases and a reproducible scratch-model Revit test script. Tool surface is 232 standard / 235 adaptive.
 - Documented FreeForm host-constraint limitations and the distinction between geometry generation and engineering design checks.
+
+- Added an explicit top-slab inverted-U example with both anchorage legs downward, an additional input test, and live endpoint-elevation checks before/after save/reopen.

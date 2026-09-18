@@ -57,7 +57,7 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 509 unit tests, build Revit 2024, 232 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 510 unit tests, build Revit 2024, 232 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 
@@ -69,4 +69,4 @@ Xem [kết quả kiểm chứng](docs/verification.md): 509 unit tests, build Re
 
 Bản 1.1 bổ sung Rebar nhiều đoạn cho neo, cầu thang gấp khúc, sàn bẻ đầu và chân kê/chân chó; danh mục detailing và tạo native detailed steel connection. Xem [cách dùng và giới hạn](docs/rebar-detailing.md).
 
-Đã kiểm tra trực tiếp bốn dạng thép trong Revit 2024: cung uốn, sửa bộ thép/chân chó, rollback và lưu/mở lại 4 bộ gồm 18 thanh. Đây là thử hình học trên host bê tông riêng, chưa phải kiểm tra thiết kế neo qua nút sàn–dầm.
+Đã kiểm tra trực tiếp năm dạng thép trong Revit 2024: cung uốn, sửa bộ thép/chân chó, rollback và lưu/mở lại 5 bộ gồm 24 thanh. Đây là thử hình học trên host bê tông riêng, chưa phải kiểm tra thiết kế neo qua nút sàn–dầm.

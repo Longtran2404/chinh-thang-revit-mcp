@@ -39,7 +39,8 @@ public class McpDynamicScript
     new {name="anchored_slab",mode="ShapeDriven",points="[[500,-1000,600],[500,-1000,200],[3500,-1000,200],[3500,-1000,600]]",rule="FixedNumber",qty=6,len=1000.0,spacing=0.0},
     new {name="stair_zigzag",mode="ShapeDriven",points="[[500,-1000,1000],[1000,-1000,1000],[2500,-1000,2500],[3500,-1000,2500]]",rule="MaximumSpacing",qty=1,len=900.0,spacing=200.0},
     new {name="planar_chair",mode="ShapeDriven",points="[[4500,-1000,200],[4800,-1000,200],[4800,-1000,600],[5500,-1000,600],[5500,-1000,200],[5800,-1000,200]]",rule="Single",qty=1,len=0.0,spacing=0.0},
-    new {name="spatial_chair",mode="FreeForm",points="[[6500,-1000,200],[6800,-1000,200],[6800,-1000,600],[6800,-500,600],[6800,-500,200],[7100,-500,200]]",rule="FixedNumber",qty=3,len=800.0,spacing=0.0}
+    new {name="spatial_chair",mode="FreeForm",points="[[6500,-1000,200],[6800,-1000,200],[6800,-1000,600],[6800,-500,600],[6800,-500,200],[7100,-500,200]]",rule="FixedNumber",qty=3,len=800.0,spacing=0.0},
+    new {name="top_slab_downturned_ends",mode="ShapeDriven",points="[[500,-1000,1600],[500,-1000,2000],[3500,-1000,2000],[3500,-1000,1600]]",rule="FixedNumber",qty=6,len=1000.0,spacing=0.0}
    };
    var rows=new JArray();var ids=new List<ElementId>();
    foreach(var test in tests) {
@@ -55,6 +56,11 @@ public class McpDynamicScript
     var bar=(Rebar)d.GetElement(new ElementId(row.Value<long>("created_id")));ids.Add(bar.Id);
     if(bar.GetHostId()!=wall.Id) throw new Exception("Host mismatch");
     var curves=bar.GetCenterlineCurves(false,false,false,MultiplanarOption.IncludeAllMultiplanarCurves,0);
+    if(test.name=="top_slab_downturned_ends") {
+     var first=curves.First().GetEndPoint(0);var last=curves.Last().GetEndPoint(1);
+     if(Math.Abs(first.Z*304.8-1600)>0.1 || Math.Abs(last.Z*304.8-1600)>0.1 || !curves.OfType<Line>().Any(c=>Math.Abs(c.GetEndPoint(0).Z*304.8-2000)<0.1 && Math.Abs(c.GetEndPoint(1).Z*304.8-2000)<0.1)) throw new Exception("Top slab ends must point down below the horizontal top bar");
+     row["both_ends_down"]=true;row["top_bar_elevation_mm"]=2000;row["end_elevation_mm"]=1600;
+    }
     row["centreline_curves"]=curves.Count;row["has_bend_arcs"]=curves.Any(c=>c is Arc);
     if(!curves.Any(c=>c is Arc)) throw new Exception("Bends were not created");
     if(bar.Quantity!=(test.rule=="Single" ? 1 : test.rule=="FixedNumber" ? test.qty : (int)Math.Ceiling(test.len/test.spacing)+1)) throw new Exception("Quantity mismatch");
@@ -91,8 +97,12 @@ public class McpDynamicScript
    var save=Path.Combine(root,"CT_Rebar_Check.rvt");d.SaveAs(save,new SaveAsOptions());d.Close(false);d=null;
    d=app.Application.OpenDocumentFile(save);
    report["reopened_rebar_sets"]=new FilteredElementCollector(d).OfClass(typeof(Rebar)).GetElementCount();
-   if(report.Value<int>("reopened_rebar_sets")!=4) throw new Exception("Reopen count mismatch");
+   if(report.Value<int>("reopened_rebar_sets")!=5) throw new Exception("Reopen count mismatch");
    report["reopened_total_bars"]=new FilteredElementCollector(d).OfClass(typeof(Rebar)).Cast<Rebar>().Sum(b=>b.Quantity);
+   var top=(Rebar)d.GetElement(new ElementId(((JObject)rows.Last).Value<long>("created_id")));
+   var topCurves=top.GetCenterlineCurves(false,false,false,MultiplanarOption.IncludeAllMultiplanarCurves,0);
+   if(Math.Abs(topCurves.First().GetEndPoint(0).Z*304.8-1600)>0.1 || Math.Abs(topCurves.Last().GetEndPoint(1).Z*304.8-1600)>0.1) throw new Exception("Top bar downward ends changed after reopen");
+   report["reopened_top_bar_ends_down"]=true;
    report["saved_model"]=save;
    report["status"]="PASS";
   } catch(Exception ex) { report["status"]="FAIL";report["error"]=ex.ToString(); }
