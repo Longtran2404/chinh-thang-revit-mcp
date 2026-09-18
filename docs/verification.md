@@ -37,5 +37,10 @@ During initial diagnosis, a call while Revit was still on Home correctly reporte
 - Twenty new tests cover anchored/stair/spatial-chair paths, invalid geometry and ambiguous/excessive distributions.
 - The 1.1 package is installed locally and its real stdio handshake exposes 232 tools.
 - Live rebar scenarios are provided in `scripts/verify-rebar-live.cs`: a separate concrete fixture, dry-run, four bent-bar cases, native edits, invalid-bend rollback and save/reopen.
-- Runtime verification of these new scenarios is pending the user's Revit unsigned-add-in loading confirmation. Build success is not reported as live detailing success.
+- Live Revit 2024 scratch tests passed: two-ended anchored path (6 bars), stair zigzag with maximum spacing (6 bars), planar chair (1 bar) and spatial FreeForm chairs (3 bars). All are native Rebar with actual bend arcs and the requested host/type.
+- Each case passed a committed-then-rolled-back dry-run with no residual bars. An impossible short bend was rejected with clean rollback.
+- Shape-driven layout was edited from 6 to 8 bars; spatial-chair geometry was edited using SetCurves. Saved/reopened RVT retained 4 sets totaling 18 bars.
+- These geometry tests used a wide concrete wall fixture; they do not certify anchorage/cover across an actual slab-beam joint or a full stair assembly.
+- Actual MCP calls passed catalog inspection and a bent-rebar dry-run. Invalid detailed steel connection type was rejected without fallback. Live current-view read and all 232 tools passed on the installed 1.1 server.
+- GitHub Actions build/test/package/stdio checks passed for the detailing implementation commit ee6e3d5.
 - Detailed steel connection fabrication geometry and capacity are not verified by creating a native handler. Loaded connection types and the Autodesk service are required.

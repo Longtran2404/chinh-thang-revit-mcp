@@ -43,7 +43,7 @@ public class McpDynamicScript
    };
    var rows=new JArray();var ids=new List<ElementId>();
    foreach(var test in tests) {
-    var req=new JObject { ["host_id"]=RevitCompat.GetId(wall.Id),["bar_type_id"]=RevitCompat.GetId(barType.Id),["points_json"]=test.points,["mode"]=test.mode,["normal_x"]=0,["normal_y"]=1,["normal_z"]=0,["layout_rule"]=test.rule,["quantity"]=test.qty,["distribution_length_mm"]=test.len,["spacing_mm"]=test.spacing,["dry_run"]=true };
+    var req=new JObject { ["host_id"]=wall.Id.Value,["bar_type_id"]=barType.Id.Value,["points_json"]=test.points,["mode"]=test.mode,["normal_x"]=0,["normal_y"]=1,["normal_z"]=0,["layout_rule"]=test.rule,["quantity"]=test.qty,["distribution_length_mm"]=test.len,["spacing_mm"]=test.spacing,["dry_run"]=true };
     var before=new FilteredElementCollector(d).OfClass(typeof(Rebar)).GetElementCount();
     var preview=CreateRebarPathHandler.Create(d,req);
     if(!preview.Success) throw new Exception(test.name+" preview: "+preview.Error);
@@ -52,7 +52,7 @@ public class McpDynamicScript
     var result=CreateRebarPathHandler.Create(d,req);
     if(!result.Success) throw new Exception(test.name+": "+result.Error);
     var row=JObject.FromObject(result.Data);row["test"]=test.name;row["dry_run_clean"]=true;
-    var bar=(Rebar)d.GetElement(RevitCompat.ToElementId(row.Value<long>("created_id")));ids.Add(bar.Id);
+    var bar=(Rebar)d.GetElement(new ElementId(row.Value<long>("created_id")));ids.Add(bar.Id);
     if(bar.GetHostId()!=wall.Id) throw new Exception("Host mismatch");
     var curves=bar.GetCenterlineCurves(false,false,false,MultiplanarOption.IncludeAllMultiplanarCurves,0);
     row["centreline_curves"]=curves.Count;row["has_bend_arcs"]=curves.Any(c=>c is Arc);
@@ -83,7 +83,7 @@ public class McpDynamicScript
    var countBefore=new FilteredElementCollector(d).OfClass(typeof(Rebar)).GetElementCount();
    bool rejected=false;
    try {
-    var invalid=new JObject { ["host_id"]=RevitCompat.GetId(wall.Id),["bar_type_id"]=RevitCompat.GetId(barType.Id),["points_json"]="[[500,0,500],[502,0,500],[502,0,502]]",["normal_y"]=1,["dry_run"]=true };
+    var invalid=new JObject { ["host_id"]=wall.Id.Value,["bar_type_id"]=barType.Id.Value,["points_json"]="[[500,0,500],[502,0,500],[502,0,502]]",["normal_y"]=1,["dry_run"]=true };
     rejected=!CreateRebarPathHandler.Create(d,invalid).Success;
    } catch { rejected=true; }
    if(!rejected || new FilteredElementCollector(d).OfClass(typeof(Rebar)).GetElementCount()!=countBefore) throw new Exception("Invalid bend did not reject/rollback cleanly");
