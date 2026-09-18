@@ -248,7 +248,7 @@ namespace RvtMcp.Server
             {
                 Name = "chinh-thang-revit-mcp",
                 Title = "Chinh Thang Revit MCP",
-                Version = "1.0.0",
+                Version = "1.1.0",
                 Description = "Model Context Protocol gateway for Autodesk Revit 2022-2027",
                 WebsiteUrl = "https://github.com/Longtran2404/chinh-thang-revit-mcp"
             };
@@ -2434,6 +2434,31 @@ Start with revit_get_current_view_info. Multiple sessions: revit_list_available_
     [McpServerToolType, Toolset("structural")]
     public class StructuralTools
     {
+        [McpServerTool(Name = "revit_create_rebar_path"), System.ComponentModel.Description("Create native bent Rebar for L/U/Z anchorage, stair zigzags, slab-to-beam bent ends and chairs. points_json is an array of 2-128 centreline [x,y,z] vertices in mm, including explicit anchorage legs; bends use the chosen bar type. ShapeDriven requires a planar path perpendicular to normal; FreeForm supports spatial chairs, uses normal as distribution direction, and is unconstrained (no later host-face constraints). Explicit host/type required. Single quantity=1; FixedNumber quantity>=2 + distribution_length_mm; MaximumSpacing spacing_mm + distribution_length_mm (quantity=1). Positive normal controls distribution side. No automatic cover/anchorage/capacity design. dry_run rolls back. Read docs/rebar-detailing.md.")]
+        public static async Task<string> CreateRebarPath(long host_id, long bar_type_id, string points_json, double normal_x, double normal_y, double normal_z, string mode = "ShapeDriven", string layout_rule = "Single", int quantity = 1, double distribution_length_mm = 0, double spacing_mm = 0, bool dry_run = false)
+        {
+            var blocked = ServerState.BlockIfReadOnly("create_rebar_path");
+            if (blocked != null) return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_rebar_path", new { host_id,bar_type_id,points_json,normal_x,normal_y,normal_z,mode,layout_rule,quantity,distribution_length_mm,spacing_mm,dry_run }), Formatting.Indented); }
+            catch(Exception ex) { return "Error: " + ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_get_detailing_catalog", ReadOnly = true, Idempotent = true), System.ComponentModel.Description("Inspect actual project rebar types with diameter/bend diameter, cover types and detailed steel connection types (up to 500 each). Optional host_id checks valid rebar hosting. Use explicit returned IDs when detailing.")]
+        public static async Task<string> GetDetailingCatalog(long? host_id = null)
+        {
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("get_detailing_catalog", new { host_id }), Formatting.Indented); }
+            catch(Exception ex) { return "Error: " + ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_steel_connection"), System.ComponentModel.Description("Create native detailed steel connection from a loaded detailed type_id and element_ids (primary first). Requires installed Revit detailed connection service. Rejects generic markers; no fallback geometry. dry_run validates then rolls back. Does not calculate structural capacity.")]
+        public static async Task<string> CreateSteelConnection(long type_id, long[] element_ids, bool dry_run = false)
+        {
+            var blocked = ServerState.BlockIfReadOnly("create_steel_connection");
+            if (blocked != null) return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_steel_connection", new { type_id,element_ids,dry_run }), Formatting.Indented); }
+            catch(Exception ex) { return "Error: " + ex.Message; }
+        }
+
         [McpServerTool(Name = "revit_create_structural_column"), System.ComponentModel.Description("Create a structural column at a point. Params: type_id OR type_name (structural column family), x_mm/y_mm/z_mm (default 0), level_id OR level_name (default lowest level), height_mm (optional top offset), rotation_deg (optional, default 0).")]
         public static async Task<string> CreateStructuralColumn(
             long? type_id = null, string type_name = null,

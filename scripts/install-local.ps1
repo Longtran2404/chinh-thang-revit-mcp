@@ -12,7 +12,7 @@ param(
 $ErrorActionPreference = 'Stop'
 if (-not $SourceDir) {
     if (Test-Path "$PSScriptRoot\server") { $SourceDir = $PSScriptRoot }
-    else { $SourceDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'artifacts\ChinhThangRevitMcp-1.0.0-win-x64' }
+    else { $SourceDir = Join-Path (Split-Path $PSScriptRoot -Parent) 'artifacts\ChinhThangRevitMcp-1.1.0-win-x64' }
 }
 if (-not (Test-Path "$RevitDir\RevitAPI.dll")) { throw 'Revit 2024 was not found.' }
 foreach ($required in @('server\RvtMcp.Server.exe','plugin\RvtMcp.Plugin.dll','plugin\e_sqlite3.dll')) {

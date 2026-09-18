@@ -1,3 +1,9 @@
+## Chinh Thang 1.1.0
+
+- Native bent Rebar paths, detailing catalog and detailed steel connection creation.
+- `--toolsets all` **232**, adaptive bake **235**.
+- Explicit geometry and distribution; transactional validation and dry-run.
+
 <!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Changelog
 

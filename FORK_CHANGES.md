@@ -22,3 +22,7 @@ The Git history retains upstream authorship. Source files with edits carry chang
 - Prefer the installed Revit 2024 API assemblies; CI fallback targets 2024.0, avoiding an unnecessary 24.2 dependency on base 2024 installations.
 
 - Fixed completion notifications for C# scripts returning structured objects/arrays; added two regression tests.
+
+- Version 1.1: added explicit native bent-rebar path authoring (planar and spatial), bounded distributions, real commit validation inside reversible dry-run groups, detailing type inspection and detailed steel connection creation without generic fallback.
+- Added 20 geometry/layout validation cases and a reproducible scratch-model Revit test script. Tool surface is 232 standard / 235 adaptive.
+- Documented FreeForm host-constraint limitations and the distinction between geometry generation and engineering design checks.

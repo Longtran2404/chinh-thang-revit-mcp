@@ -1,7 +1,7 @@
 <!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Chính Thắng Revit MCP
 
-![MCP tools](https://img.shields.io/badge/MCP-229%20tools-blue)
+![MCP tools](https://img.shields.io/badge/MCP-232%20tools-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
 MCP chạy cục bộ để kết nối AI client với Autodesk Revit. Bản riêng của **Minh Long Tran / Chính Thắng**, phát triển từ [bimwright/rvt-mcp](https://github.com/bimwright/rvt-mcp).
@@ -38,8 +38,8 @@ Xem thêm [material/PBR](docs/material-appearance.md) và [toàn bộ quy trình
 | Chế độ | Số tools | Ghi chú |
 |---|---:|---|
 | Mặc định | **40** | query, create, view, meta |
-| `--toolsets all` | **229** | Bộ cài bản riêng dùng chế độ này |
-| `all` + adaptive bake | **232** | Thêm quản lý gợi ý; mặc định tắt |
+| `--toolsets all` | **232** | Bộ cài bản riêng dùng chế độ này |
+| `all` + adaptive bake | **235** | Thêm quản lý gợi ý; mặc định tắt |
 
 Dùng `--read-only` nếu chỉ muốn đọc. Đơn vị chiều dài tại biên MCP là mm. AI client vẫn có thể gửi nội dung tool cho dịch vụ AI mà bạn đang sử dụng.
 
@@ -57,10 +57,14 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 489 unit tests, build Revit 2024, 229 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 509 unit tests, build Revit 2024, 232 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 
 [Apache-2.0](LICENSE). Giữ bản quyền upstream của Khoa Le, xem [NOTICE](NOTICE) và [các thay đổi của bản riêng](FORK_CHANGES.md).
 
 Đây là bản phái sinh độc lập, không phải sản phẩm chính thức của Autodesk hay bimwright. Không đưa Revit DLL, dữ liệu công trình, token hoặc cấu hình cá nhân lên GitHub.
+
+## Bố trí thép chi tiết
+
+Bản 1.1 bổ sung Rebar nhiều đoạn cho neo, cầu thang gấp khúc, sàn bẻ đầu và chân kê/chân chó; danh mục detailing và tạo native detailed steel connection. Xem [cách dùng và giới hạn](docs/rebar-detailing.md).

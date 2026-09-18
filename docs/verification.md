@@ -2,10 +2,10 @@
 
 ## Automated and protocol checks
 
-- 489 unit tests passed, including strict material edit input validation.
+- 509 unit tests passed, including strict material edit input validation.
 - Revit 2024 add-in Release build: zero warnings, zero errors.
 - Self-contained Windows x64 server started without a separately installed runtime.
-- Real stdio MCP initialize and tools/list passed: identity `chinh-thang-revit-mcp`, version 1.0.0, 229 tools.
+- Real stdio MCP initialize and tools/list passed: identity `chinh-thang-revit-mcp`, version 1.1.0, 232 tools.
 - Embedded native BIM policy resource read successfully through MCP.
 - Installer preview, repeated installation and preservation of unrelated nested host configuration passed.
 - Installed Codex TOML parsed successfully; pre-existing server entry retained; backup created.
@@ -30,3 +30,12 @@ These checks establish build, protocol, Revit connectivity and the tested API op
 Editable Family requirements are embedded guidance. A comprehensive Family Editor authoring suite and automatic material-library/image-generation pipeline are not implemented. The existing tools plus checked Revit API code are available for those workflows.
 
 During initial diagnosis, a call while Revit was still on Home correctly reported `No document is open`; this produced a failure toast. With a model open and MCP ON, the live call passed. The build was then adjusted to prefer the installed Revit API; CI falls back to the Revit 2024.0 package.
+
+## Rebar and steel upgrade 1.1
+
+- Three new tools compile against the installed Revit 2024 API: bent rebar paths, project detailing catalog and native detailed steel connection creation.
+- Twenty new tests cover anchored/stair/spatial-chair paths, invalid geometry and ambiguous/excessive distributions.
+- The 1.1 package is installed locally and its real stdio handshake exposes 232 tools.
+- Live rebar scenarios are provided in `scripts/verify-rebar-live.cs`: a separate concrete fixture, dry-run, four bent-bar cases, native edits, invalid-bend rollback and save/reopen.
+- Runtime verification of these new scenarios is pending the user's Revit unsigned-add-in loading confirmation. Build success is not reported as live detailing success.
+- Detailed steel connection fabrication geometry and capacity are not verified by creating a native handler. Loaded connection types and the Autodesk service are required.

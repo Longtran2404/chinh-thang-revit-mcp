@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 229,
+  "tool_count": 232,
   "tools": [
     {
       "name": "revit_acquire_coordinates_from_link",
@@ -1687,6 +1687,71 @@
       }
     },
     {
+      "name": "revit_create_rebar_path",
+      "description_hash": "sha256:a323c7fae9d644dc124bcb4c3e7339fcabfca4c0c30b2be3b62fdc96f90c5e7a",
+      "inputSchema": {
+        "properties": {
+          "bar_type_id": {
+            "description": "",
+            "type": "Int64"
+          },
+          "distribution_length_mm": {
+            "description": "",
+            "type": "Double"
+          },
+          "dry_run": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "host_id": {
+            "description": "",
+            "type": "Int64"
+          },
+          "layout_rule": {
+            "description": "",
+            "type": "String"
+          },
+          "mode": {
+            "description": "",
+            "type": "String"
+          },
+          "normal_x": {
+            "description": "",
+            "type": "Double"
+          },
+          "normal_y": {
+            "description": "",
+            "type": "Double"
+          },
+          "normal_z": {
+            "description": "",
+            "type": "Double"
+          },
+          "points_json": {
+            "description": "",
+            "type": "String"
+          },
+          "quantity": {
+            "description": "",
+            "type": "Int32"
+          },
+          "spacing_mm": {
+            "description": "",
+            "type": "Double"
+          }
+        },
+        "required": [
+          "host_id",
+          "bar_type_id",
+          "points_json",
+          "normal_x",
+          "normal_y",
+          "normal_z"
+        ],
+        "type": "object"
+      }
+    },
+    {
       "name": "revit_create_rebar_set",
       "description_hash": "sha256:f993e05e58be47a886b30577375d8ed364f613d0d8a3794607aaedb7b938ac7a",
       "inputSchema": {
@@ -2069,6 +2134,31 @@
         "required": [
           "x",
           "y"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_steel_connection",
+      "description_hash": "sha256:48509a49c1209472268ece6b364ab69b5e24c15976bce0f8d5e1d312078c29c9",
+      "inputSchema": {
+        "properties": {
+          "dry_run": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "element_ids": {
+            "description": "",
+            "type": "Int64[]"
+          },
+          "type_id": {
+            "description": "",
+            "type": "Int64"
+          }
+        },
+        "required": [
+          "type_id",
+          "element_ids"
         ],
         "type": "object"
       }
@@ -3187,6 +3277,20 @@
       "description_hash": "sha256:599528b482b0c92c35c4a1a9e8753b5a57b3ffd9b69fb51e96c6cd0fde504f2d",
       "inputSchema": {
         "properties": {},
+        "required": [],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_get_detailing_catalog",
+      "description_hash": "sha256:fe0cbdb823d440a138cdf23021139a2368e906c5613bec4843a41c256ae47297",
+      "inputSchema": {
+        "properties": {
+          "host_id": {
+            "description": "",
+            "type": "Nullable`1"
+          }
+        },
         "required": [],
         "type": "object"
       }

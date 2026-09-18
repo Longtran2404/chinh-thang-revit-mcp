@@ -17,7 +17,7 @@ function Invoke-Dotnet([string[]]$Arguments) {
 }
 Push-Location $root
 try {
-    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.0.0-win-x64'
+    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.1.0-win-x64'
     if (Test-Path -LiteralPath $package) {
         # Do not mix old and new build outputs; keep the previous package intact.
         Move-Item -LiteralPath $package -Destination ($package + '.previous-' + (Get-Date -Format 'yyyyMMddHHmmssfff'))
