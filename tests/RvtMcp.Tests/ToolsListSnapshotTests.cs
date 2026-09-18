@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -200,7 +201,7 @@ namespace RvtMcp.Tests
             Assert.NotNull(field);
             var text = (string)(field!.GetRawConstantValue() ?? field.GetValue(null)!);
             var bytes = System.Text.Encoding.UTF8.GetByteCount(text);
-            Assert.True(bytes <= 2048, $"ServerInstructionsText is {bytes} UTF-8 bytes (Anthropic Tool Search cap is 2048).");
+            Assert.True(bytes <= 2048, $"ServerInstructionsText is {bytes} UTF-8 bytes (MCP discovery cap is 2048).");
         }
 
         [Fact]

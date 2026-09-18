@@ -1,9 +1,9 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Architecture
 
 ## Two processes, one pipe
 
 ```
-MCP client (Claude Code / Cursor / …)
         │  stdio (NDJSON)
         ▼
 RvtMcp.Server  (.NET 8 console app, global tool)

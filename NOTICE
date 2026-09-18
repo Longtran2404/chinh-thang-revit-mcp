@@ -1,0 +1,12 @@
+Chinh Thang Revit MCP
+Copyright 2026 Minh Long Tran (fork modifications).
+
+Based on rvt-mcp by bimwright / Khoa Le.
+Upstream: https://github.com/bimwright/rvt-mcp
+Upstream baseline: 5c127f80a6bb443555ce6a6a3c5cb4b364678436
+Copyright 2026 Khoa Le. Licensed under Apache License 2.0.
+Original license and applicable source notices are retained.
+See FORK_CHANGES.md for the modifications made to this distribution.
+
+Autodesk and Revit are trademarks of Autodesk, Inc.
+This project is independent and is not endorsed by Autodesk or bimwright.

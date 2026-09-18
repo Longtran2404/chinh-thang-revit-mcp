@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.Linq;
 using RvtMcp.Server.Bake;
@@ -97,7 +98,7 @@ namespace RvtMcp.Tests
         {
             var provider = new CountingNameProvider();
             var proposer = new SuggestionProposer(
-                envLookup: key => key == "ANTHROPIC_API_KEY" ? "present" : null,
+                envLookup: _ => throw new InvalidOperationException("Provider must not require environment credentials"),
                 nameProvider: provider);
             var now = DateTimeOffset.Parse("2026-04-27T12:00:00Z");
 

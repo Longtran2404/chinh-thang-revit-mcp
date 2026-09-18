@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # rvt-mcp master checklist (verified 2026-07-15)
 
 Tracking list from owner brainstorm. Each item verified against code via explore sub-agents + direct reads.  
@@ -111,7 +112,6 @@ tool calls → UsageEventLogger (usage.jsonl) → ClusterEngine → suggestions
 - `mcp-calls.jsonl` is **hash-only** for send_code — **not** bake’s input; bake uses `usage.jsonl`.
 - `BakeRedactor` **sanitizes** (paths/secrets), does **not** wipe entire source when cache/journal on.
 - After **successful accept**, `run_baked_tool` uses **stored `source_code`** in `bake.db` — does **not** need original history.
-- send_code **accept** needs condensation samples (+ often `ANTHROPIC_API_KEY`) — fails without cache samples.
 
 **Answer to “bake works if send_code locked?”**  
 - **Run already-accepted tools:** **YES**.  
@@ -128,7 +128,6 @@ tool calls → UsageEventLogger (usage.jsonl) → ClusterEngine → suggestions
 | Separate `dotnet` SDK for bake runtime | **No** |
 | Revit + rvt-mcp plugin (ships Roslyn DLLs) | **Yes** |
 | MCP server for agent accept/list/run | **Yes** |
-| `ANTHROPIC_API_KEY` | Only for **send_code** condense/name; not preset/macro/run |
 
 **Mechanism:** `ToolCompiler.Compile` — Roslyn `CSharpCompilation` → `Emit` → `MemoryStream` → `Assembly.Load` **inside Revit process**. Not write `.csproj` + build.
 

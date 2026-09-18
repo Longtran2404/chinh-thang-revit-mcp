@@ -1,3 +1,4 @@
+# Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 #Requires -Version 5.1
 <#
 .SYNOPSIS
@@ -36,7 +37,7 @@ param(
     [string]$SourceDir,
     [switch]$Uninstall,
     [int[]]$Years,
-    [ValidateSet('Auto', 'codex', 'opencode', 'kilo', 'claude', 'none')]
+    [ValidateSet('Auto', 'codex', 'opencode', 'kilo', 'none')]
     [string]$Client = 'Auto',
     [ValidateSet('opencode', 'codex', 'kilo')]
     [string]$WireClient,
@@ -443,85 +444,6 @@ enabled = true$envLines
     return $true
 }
 
-function Add-ClaudeEntry {
-    [CmdletBinding(SupportsShouldProcess = $true)]
-    param(
-        [Parameter(Mandatory = $true)][string]$ConfigPath,
-        [Parameter(Mandatory = $true)][object[]]$Targets,
-        [switch]$RequireExisting
-    )
-
-    if (-not (Test-Path $ConfigPath)) {
-        $msg = "[claude] config not found at $ConfigPath"
-        if ($RequireExisting) { Write-Warning "$msg - skipping wire" } else { Write-Host "$msg - skipping" }
-        return $false
-    }
-
-    try {
-        $cfg = Read-JsonHashtable -Path $ConfigPath
-    } catch {
-        Write-Warning ("[claude] parse failed at {0}: {1} - skipping" -f $ConfigPath, $_.Exception.Message)
-        return $false
-    }
-
-    if (-not $cfg.ContainsKey('mcpServers')) { $cfg['mcpServers'] = @{} }
-
-    $desired = @{}
-    foreach ($t in $Targets) {
-        $name = $t.Name
-        $entry = [ordered]@{
-            command = $t.ServerCmd
-            args = @($t.Args)
-        }
-        if ($t.PSObject.Properties.Name -contains 'Env' -and $t.Env -and $t.Env.Count -gt 0) {
-            $entry['env'] = $t.Env
-        }
-        $desired[$name] = $entry
-    }
-
-    $legacyRemoved = Remove-LegacyBimwrightEntries -Map $cfg['mcpServers']
-    $changed = $legacyRemoved -gt 0
-    foreach ($k in $desired.Keys) {
-        $existingJson = if ($cfg['mcpServers'].ContainsKey($k)) { ($cfg['mcpServers'][$k] | ConvertTo-Json -Depth 20 -Compress) } else { $null }
-        $newJson = $desired[$k] | ConvertTo-Json -Depth 20 -Compress
-        if ($existingJson -ne $newJson) {
-            $cfg['mcpServers'][$k] = $desired[$k]
-            $changed = $true
-        }
-    }
-
-    if (-not $changed) {
-        Write-Host ("[claude] no changes needed at {0}" -f $ConfigPath)
-        return $true
-    }
-
-    if ($PSCmdlet.ShouldProcess($ConfigPath, 'Upsert mcpServers.rvt-mcp entry')) {
-        $content = $cfg | ConvertTo-Json -Depth 50
-        $bak = Write-ConfigAtomic -Path $ConfigPath -Content $content
-        Write-Host ("[claude] wired {0} entry -> {1} (backup: {2})" -f $desired.Count, $ConfigPath, $bak)
-    }
-    return $true
-}
-
-function Add-ClaudeEntries {
-    param(
-        [Parameter(Mandatory = $true)][object[]]$Targets,
-        [switch]$RequireExisting
-    )
-    $paths = @(
-        (Join-Path $env:USERPROFILE '.claude.json'),
-        (Join-Path $env:USERPROFILE '.claude\mcp.json'),
-        (Join-Path $env:APPDATA 'Claude\claude_desktop_config.json')
-    )
-    $handled = $false
-    foreach ($path in $paths) {
-        if (Add-ClaudeEntry -ConfigPath $path -Targets $Targets -RequireExisting:$RequireExisting) {
-            $handled = $true
-        }
-    }
-    return $handled
-}
-
 if (-not $Years -or $Years.Count -eq 0) {
     $Years = Get-InstalledRevitYears
     if ($Years.Count -eq 0) {
@@ -661,10 +583,6 @@ if (-not $Uninstall -and $Client -ne 'none') {
             if ($Client -eq 'Auto' -or $Client -eq 'codex') {
                 $ok = Add-CodexEntry -ConfigPath (Join-Path $env:USERPROFILE '.codex\config.toml') -Targets $targets -RequireExisting:$requireExisting
                 if ($ok) { $wireStatus += 'codex' }
-            }
-            if ($Client -eq 'Auto' -or $Client -eq 'claude') {
-                $ok = Add-ClaudeEntries -Targets $targets -RequireExisting:$requireExisting
-                if ($ok) { $wireStatus += 'claude' }
             }
         }
     }

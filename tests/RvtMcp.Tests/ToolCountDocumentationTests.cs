@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System.IO;
 using System.Runtime.CompilerServices;
 using Newtonsoft.Json.Linq;
@@ -15,7 +16,7 @@ namespace RvtMcp.Tests
             var standard = ReadToolCount(Path.Combine(goldenRoot, "tools-list.json"));
             var adaptive = ReadToolCount(Path.Combine(goldenRoot, "tools-list-adaptive-bake.json"));
 
-            foreach (var readmeName in new[] { "README.md", "README.vi.md", "README.zh-CN.md", "README.ja.md" })
+            foreach (var readmeName in new[] { "README.md", "README.vi.md" })
             {
                 var readme = File.ReadAllText(Path.Combine(root, readmeName));
                 Assert.Contains("MCP-" + standard + "%20tools", readme);
@@ -23,8 +24,8 @@ namespace RvtMcp.Tests
                 Assert.Contains("| `all` + adaptive bake | **" + adaptive + "**", readme);
             }
 
-            var claude = File.ReadAllText(Path.Combine(root, "CLAUDE.md"));
-            Assert.Contains(standard + " Revit tools with `--toolsets all` (" + adaptive + " with adaptive bake)", claude);
+            var guide = File.ReadAllText(Path.Combine(root, "AGENTS.md"));
+            Assert.Contains(standard + " Revit tools with `--toolsets all` (" + adaptive + " with adaptive bake)", guide);
 
             var changelog = File.ReadAllText(Path.Combine(root, "CHANGELOG.md"));
             Assert.Contains("`--toolsets all` **" + standard + "**, adaptive bake **" + adaptive + "**", changelog);

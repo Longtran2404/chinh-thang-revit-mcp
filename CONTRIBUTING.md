@@ -1,4 +1,5 @@
-﻿# Contributing to Bimwright
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
+# Contributing to Bimwright
 
 Thanks for your interest. Bimwright is a solo-maintained project shipping its first public release; this guide is the short version. Open an issue before a large PR so we can agree on scope.
 
@@ -104,12 +105,10 @@ When you intentionally add, rename, or reshape a tool:
 3. Commit the updated golden file alongside your source change in the same PR.
 
 ### Weak-model benchmark
-Run the Haiku benchmark before merging when your PR:
 - Adds five or more new handler files, OR
 - Edits any tool's description text, OR
 - Precedes tagging a minor or major release.
 
-Procedure: see `benchmarks/README.md`. The benchmark uses Claude Code to spawn a Haiku sub-agent; no Anthropic API key is required.
 
 A ≥15% param-accuracy drop vs the last baseline blocks merge until the regression is understood. Smaller drops are human-review.
 

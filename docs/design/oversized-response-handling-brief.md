@@ -1,7 +1,7 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Brief: Xử lý response >1 MiB — khảo sát tool + lộ trình 2 bước
 
 > **Trạng thái:** COMPLETE — Bước 1 + Bước 2 hoàn tất; Chốt Dừng #3 đã được User duyệt.
-> **Cơ chế kiểm soát:** User (Khoa) + Claude giám sát. Có **3 chốt dừng bắt buộc** (xem §7).
 > **Repo:** `rvt-mcp` (chỉ repo này). Nhánh làm việc hiện tại: `hardening/agent-guardrails` (PR #10).
 > **Lưu ý lịch sử:** các count 227/230 và 468 test bên dưới là snapshot khi brief hoàn tất; count hiện hành được khóa bởi `tests/RvtMcp.Tests/Golden/tools-list*.json`.
 
@@ -43,7 +43,6 @@ Chặn cứng có 2 tác dụng phụ:
 Mục tiêu: **tool phải giúp agent hoàn thành việc user giao NHANH**, đồng thời **đáng tin** và **đúng kiến trúc**.
 
 ### Ràng buộc kiến trúc (BẤT KHẢ XÂM PHẠM)
-- **Client-agnostic:** MCP server không được giả định client nào cũng chạy được Python/SQL. Claude Code chạy được; Cursor/Cline/client khác thì không chắc. → **Không** bundle script Python như một dependency *bắt buộc*.
 - **DTO mapping vẫn bắt buộc:** không serialize object Revit trực tiếp.
 - **Đơn vị I/O vẫn là mm**, convert ở biên handler.
 
@@ -92,7 +91,6 @@ Phân mỗi tool vào **1 trong 4 nhóm**:
 - "Ước lượng size rủi ro": Low / Medium / High + 1 câu lý do (vd "trả list mọi element, không giới hạn").
 - Cuối bảng: **tóm tắt đếm** mỗi nhóm + **danh sách ứng viên Bước 2** (nhóm 4).
 
-**CHỐT DỪNG #1:** nộp bảng, chờ User + Claude duyệt & chỉnh phân loại. **Không sang §5 nếu chưa được duyệt.**
 
 ---
 
@@ -105,7 +103,6 @@ Theo TDD (viết test trước; repo dùng `tests/RvtMcp.Tests/`).
 2. **Bổ sung scope cho nhóm 3:** thêm `max_results`/filter/pagination cho các tool thiếu. Mỗi tool = một thay đổi nhỏ, có test.
 3. **Xử lý tool GHI (quan trọng):** với command **mutation**, response >1 MiB **không được** biến thành `success=false` gây hiểu lầm "thất bại" (vì thay đổi đã áp dụng). Phương án: mutation trả về **payload tóm tắt gọn** (id + count), không bao giờ dump toàn bộ; nếu vẫn to thì truncate phần data nhưng **giữ `success=true`**. Làm rõ trong test.
 
-**CHỐT DỪNG #2:** review Bước 1 (Claude + User) trước khi sang Bước 2.
 
 ### Bước 2 — escape hatch spill file (nhóm 4)
 1. Thêm tham số **opt-in** `output=file` (mặc định vẫn inline/chặn) cho các tool nhóm 4 đã duyệt.
@@ -141,7 +138,6 @@ Ghi chú: cân nhắc để cùng một **cơ chế spill** dùng chung cho §5-
 - **Surgical:** mỗi dòng đổi phải truy về được yêu cầu này. Không refactor lan man.
 - **Build:** Revit phải ĐÓNG trước khi build (plugin DLL bị khoá). Server luôn build/test được không cần Revit.
 - **Không** đụng repo khác (dwg/nwd/ipt). Chỉ `rvt-mcp`.
-- Cập nhật `CLAUDE.md` (mục "Threading" ghi "reject above 1 MiB") nếu hành vi đổi.
 
 ## 8. Tiêu chí nghiệm thu (Definition of Done)
 
@@ -162,7 +158,6 @@ Ghi chú: cân nhắc để cùng một **cơ chế spill** dùng chung cho §5-
 
 ## B2.0 — Quyết định đã khóa (User chốt)
 
-1. **Phạm vi filesystem: LOCAL same-machine.** Giả định client (Claude Code) và Revit cùng một máy. Response trả **path tuyệt đối** để agent tự đọc bằng công cụ của nó. Client remote vẫn nhận `preview` + `schema` nhưng **không đọc được file** — ghi rõ hạn chế này trong mô tả tool, không cố stream file qua MCP.
 2. **Bật spill: tham số `output` = `inline` (mặc định) | `file`** cho 8 tool nhóm 4. Mặc định `inline` → giữ nguyên hành vi B1 (chặn/summary). `send_code` **KHÔNG** có tham số này — nó **auto-spill theo size** (§6).
 3. **Dọn file:** mỗi lần spill, xoá file cũ hơn **24 giờ** VÀ giữ tối đa **~50 file mới nhất** trong thư mục spill.
 

@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,9 +16,6 @@ namespace RvtMcp.Server.Handlers
     public static class AcceptBakeSuggestionHandler
     {
         private const int DailyCondensationCap = 5;
-        private const string MissingAnthropicMessage =
-            "Adaptive bake accept for send_code clusters requires ANTHROPIC_API_KEY. " +
-            "Set the env var and restart the MCP server. Cluster B/C accepts work without an API key.";
 
         private static readonly Regex ToolNamePattern = new Regex("^[a-z][a-z0-9_]{2,63}$", RegexOptions.Compiled);
 
@@ -148,9 +146,6 @@ namespace RvtMcp.Server.Handlers
                 return PreparedRequest.Success(BuildRequest(name, suggestion, payload, outputChoice, cachedSchema, (string)payload["condensed_code"]));
             }
 
-            envLookup ??= Environment.GetEnvironmentVariable;
-            if (string.IsNullOrWhiteSpace(envLookup("ANTHROPIC_API_KEY")))
-                return PreparedRequest.Failure("missing_anthropic_api_key", MissingAnthropicMessage, new JObject());
             if (CondensationAttemptsToday(payload, now) >= DailyCondensationCap)
                 return PreparedRequest.Failure("condensation_daily_cap_exceeded", "Adaptive bake send_code condensation is capped at 5 attempts per day.", new JObject());
             if (codeCondenser == null)

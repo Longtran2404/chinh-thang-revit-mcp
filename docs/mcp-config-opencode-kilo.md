@@ -1,18 +1,15 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # MCP Configuration for OpenCode CLI and Kilo Code CLI
 
 > **Audience:** anyone wiring `RvtMcp.Server.exe` (or any other stdio MCP server) into OpenCode CLI or Kilo Code CLI.
 > **Last verified:** 2026-05-22 against `opencode.ai/docs` and `kilo.ai/docs`.
 
-These two CLI agents share a **non-standard MCP config format** that differs from both Anthropic (Claude Code / Desktop) and OpenAI (Codex) conventions. Copy-pasting an `mcpServers` block from a Claude config will silently fail in either tool — they look for `mcp` (no `Servers` suffix) and require array-form `command` plus an `environment` key (not `env`).
 
-For Anthropic clients see [`mcp-config-claude-clients.md`](./mcp-config-claude-clients.md).
 For OpenAI Codex see [`mcp-config-codex.md`](./mcp-config-codex.md).
 
 ---
 
-## 1. Quick comparison vs Claude / Codex
 
-| Aspect | Claude (CC / Desktop) | Codex | **OpenCode** | **Kilo Code** |
 |---|---|---|---|---|
 | Format | JSON | TOML | **JSONC** (JSON + comments) | **JSONC** |
 | Top-level key | `mcpServers` | `mcp_servers` | **`mcp`** | **`mcp`** |
@@ -21,7 +18,6 @@ For OpenAI Codex see [`mcp-config-codex.md`](./mcp-config-codex.md).
 | Server "type" key | implicit | implicit | **`"local"` \| `"remote"`** | **`"local"` \| `"remote"`** |
 | Enable toggle | implicit | `enabled` | `enabled` | `enabled` |
 | Per-server timeout | n/a | `tool_timeout_sec` (s) | `timeout` (ms) | `timeout` (ms) |
-| CLI registration | `claude mcp add` | `codex mcp add` | (config file only) | `kilo mcp add` |
 | Project-scope file | `.mcp.json` | `.codex/config.toml` (+trust) | `opencode.json` at repo root | `kilo.json` or `.kilo/kilo.json` |
 
 **Three gotchas when porting a config across tools:**
@@ -119,7 +115,6 @@ OpenCode lets you allow / deny individual tools via glob in the top-level `tools
 }
 ```
 
-The tool name pattern OpenCode generates is `<server>_<tool>` (single underscore), not `mcp__<server>__<tool>` like Claude.
 
 ### 2.5 No CLI registration command
 
@@ -259,11 +254,8 @@ For RvtMcp (40 tools by default; 229 with `--toolsets all`, or 232 with adaptive
 
 ---
 
-## 4. Common pitfalls when porting a Claude/Codex config
 
-If you have a working Claude `mcpServers` block and try to copy it to OpenCode/Kilo, **three things will break silently**:
 
-| Wrong (Claude/Codex style) | Right (OpenCode/Kilo style) |
 |---|---|
 | `"mcpServers"` | `"mcp"` |
 | `"command": "C:\\path\\to.exe"` | `"command": ["C:\\path\\to.exe"]` |
@@ -271,7 +263,6 @@ If you have a working Claude `mcpServers` block and try to copy it to OpenCode/K
 
 Symptom: the server entry is parsed but the launch fails or no tools appear. There's no schema validation error — both tools just don't show the server in `/mcp`.
 
-A fourth subtle one for **Kilo specifically**: tool permissions use `<server>_<tool>` (single underscore), not `mcp__<server>__<tool>` (Claude's double-underscore prefix). Permission rules written in Claude's pattern won't match anything in Kilo.
 
 ---
 

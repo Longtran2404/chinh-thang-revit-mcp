@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,12 +11,10 @@ namespace RvtMcp.Server.Bake
     public sealed class SuggestionProposer
     {
         private const int DailyLlmNamingCap = 5;
-        private readonly Func<string, string> _envLookup;
         private readonly ISuggestionNameProvider _nameProvider;
 
         public SuggestionProposer(Func<string, string> envLookup = null, ISuggestionNameProvider nameProvider = null)
         {
-            _envLookup = envLookup ?? Environment.GetEnvironmentVariable;
             _nameProvider = nameProvider;
         }
 
@@ -82,7 +81,6 @@ namespace RvtMcp.Server.Bake
         private string SuggestTitle(ClusterCandidate candidate, JObject payload, DateTimeOffset now, ref int namingAttemptsToday)
         {
             if (string.Equals(candidate.Source, "send_code", StringComparison.OrdinalIgnoreCase) &&
-                !string.IsNullOrWhiteSpace(_envLookup("ANTHROPIC_API_KEY")) &&
                 namingAttemptsToday < DailyLlmNamingCap &&
                 _nameProvider != null)
             {

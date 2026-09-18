@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.IO;
 using System.Linq;
@@ -336,7 +337,7 @@ namespace RvtMcp.Tests
         }
 
         [Fact]
-        public void AcceptBakeSuggestion_send_code_requires_anthropic_key_and_caches_no_failure_state()
+        public void AcceptBakeSuggestion_send_code_requires_configured_condenser_and_caches_no_failure_state()
         {
             using var sandbox = new TempDir();
             using var db = NewDb(sandbox);
@@ -351,9 +352,9 @@ namespace RvtMcp.Tests
 
             var root = JObject.Parse(json);
             Assert.False((bool)root["ok"]!);
-            Assert.Equal("missing_anthropic_api_key", (string)root["error_code"]);
+            Assert.Equal("llm_condensation_unavailable", (string)root["error_code"]);
             Assert.Equal(
-                "Adaptive bake accept for send_code clusters requires ANTHROPIC_API_KEY. Set the env var and restart the MCP server. Cluster B/C accepts work without an API key.",
+                "No send_code condenser is configured for this server process.",
                 (string)root["message"]);
             Assert.Equal("open", db.GetSuggestion("s1")!.State);
         }
@@ -371,7 +372,7 @@ namespace RvtMcp.Tests
                 "s1",
                 "condensed_tool",
                 "mcp_only",
-                envLookup: key => key == "ANTHROPIC_API_KEY" ? "present" : null,
+                envLookup: _ => throw new InvalidOperationException("Provider must not require environment credentials"),
                 codeCondenser: condenser);
 
             Assert.Equal("plugin_apply_unavailable", (string)JObject.Parse(first)["error_code"]);
@@ -425,7 +426,7 @@ namespace RvtMcp.Tests
                 suggestion.Id,
                 "condensed_tool",
                 "mcp_only",
-                envLookup: key => key == "ANTHROPIC_API_KEY" ? "present" : null,
+                envLookup: _ => throw new InvalidOperationException("Provider must not require environment credentials"),
                 codeCondenser: condenser);
 
             Assert.Equal(1, condenser.Calls);

@@ -1,4 +1,5 @@
-﻿# Fresh Install Test — End-to-End Onboarding Verification
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
+# Fresh Install Test — End-to-End Onboarding Verification
 
 Walk the public install flow on a fresh machine as a first-time user. Goal: verify install-from-zero friction before the first non-dev user files an issue.
 
@@ -16,7 +17,6 @@ Target: this repo at latest `master` or latest tag, reached purely via README st
 **Not in scope:**
 - Multi-Revit concurrent test.
 - Non-Windows install (Revit is Windows-only; not relevant).
-- Non-Claude MCP clients (covered separately).
 - Automated CI runtime smoke.
 - Performance / load testing.
 - Security penetration testing.
@@ -27,7 +27,6 @@ Target: this repo at latest `master` or latest tag, reached purely via README st
 |---|---|---|
 | Fresh machine type | Windows 11 VM (Hyper-V or VMware), no dev tools pre-installed | F1-001 |
 | Primary Revit version | Revit 2024 (.NET Framework 4.8, most common install in user base) | F1-002 |
-| Primary MCP client | Claude Code CLI | F1-003 |
 | Starting point for the "user" | `https://github.com/bimwright/rvt-mcp` README only | F1-004 |
 | License for Revit on test machine | User has own license / trial on test VM | out-of-scope |
 
@@ -37,7 +36,6 @@ Goal: lock test parameters, create the finding-log file, confirm the fresh machi
 
 - [ ] F1-001: Confirm fresh-machine type (VM / spare / coworker). Record OS version, CPU/RAM, Revit installer source. Create a finding-log file with skeleton sections: "Test environment", "F2 install-from-zero log", "F3 smoke-test log", "F4 other-version log", "F5 synthesis".
 - [ ] F1-002: Confirm primary Revit version (default R24). Verify the chosen version is installed and licensed on the test machine.
-- [ ] F1-003: Confirm primary MCP client (default Claude Code CLI). Note whether a clean install is available on the test machine or needs to be acquired as part of F2.
 - [ ] F1-004: Walk the public README once on the test machine at the starting URL. Record: does a first-time reader know what this is, what they need, and what to do next? One-paragraph impression logged.
 
 ## Phase F2 — Install-from-zero, primary version (6 tasks)
@@ -55,7 +53,6 @@ Goal: follow the public README instructions exactly — no prior knowledge, no s
 
 Goal: prove the end-to-end path works, not just that the components installed.
 
-- [ ] F3-001: From Claude CLI on the test machine, run `/mcp` — confirm `bimwright` is listed as a connected server. Log the exact output.
 - [ ] F3-002: Call `get_current_view_info` with Revit open on a default blank project. Expect DTO `{viewName, viewType, levelName, scale}`. Log exact response. Any error = F-phase bug.
 - [ ] F3-003: Call one more non-trivial handler (suggested: `analyze_model_statistics` on a blank project — expected: empty counts, no errors). Log response. This verifies the broader tool surface, not just the simplest path.
 

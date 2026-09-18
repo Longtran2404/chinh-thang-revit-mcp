@@ -1,4 +1,5 @@
-﻿# Changelog
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
+# Changelog
 
 ## Unreleased
 
@@ -63,7 +64,6 @@ First GitHub Release after v0.5.0 was unpublished. The client setup ZIP is `RvtM
 
 Two pains addressed in one release:
 
-1. **Agents couldn't find any rvt-mcp tools** even though 224 were exposed (Tool Search returned nothing because `instructions` field was empty + tool names carried no "revit" semantic signal). Failure mode warned about in `docs/mcp-config-claude-clients.md` §5.3.
 2. **Multi-Revit routing was opaque to agents** — when two Revits were open and the user said "check Revit 2024 ...", agents kept guessing `R24`/`R25` style codes, hitting the wrong instance, or routing to whichever auto-detect happened to pick first. No way to discover what was running, no clear contract on the year string format.
 
 ### Breaking changes
@@ -83,13 +83,10 @@ Two pains addressed in one release:
 - **Hard validation on `revit_switch_target`**: passing an R-code like `"R24"` returns a structured error with `recommended_next_tool: "revit_list_available_targets"` and a translation table (R22=2022 .. R27=2027). Forces the agent to read the available-targets output rather than guess.
 - **`Add-KiloEntry`** in `scripts/install.ps1` — Kilo Code CLI users are now wired automatically via `~/.config/kilo/kilo.json` (writes `type=local`, array-form `command`, `timeout=30000`, optional `environment` block).
 - **`environment` block support** in `Add-OpencodeEntry` and `Add-KiloEntry` — when a target object includes an `Env` hashtable, it is emitted under the `environment` key (closes the gap documented in `docs/mcp-config-opencode-kilo.md` §5).
-- **`env` block support** in `Add-ClaudeEntry` and `Add-CodexEntry` (Claude: `env` field per `mcp-config-claude-clients.md` §4.3; Codex: `[mcp_servers.X.env]` sub-table per `mcp-config-codex.md` §2). Parity with the JSON variants.
-- **`-Client kilo`** option in `install.ps1`. Auto mode now wires kilo alongside opencode, codex, and claude.
 
 ### Fixed
 
 - `docs/mcp-config-opencode-kilo.md` §3.6 tool count corrected from 248 to 224 (the 248 figure conflated method-level `[McpServerTool]` attributes with 24 class-level `[McpServerToolType]` attributes).
-- **Claude Code `tools fetch failed`** — 4 tools (`revit_create_dimensions`, `revit_create_filled_region`, `revit_create_room_separator`, `revit_set_titleblock_parameters`) had required `object` parameters which the C# MCP SDK emitted as JSON Schema boolean shorthand `true`. Anthropic's Zod validator rejects boolean shorthand even though it is spec-compliant. Param types changed to `object[]` (arrays) and `IDictionary<string, object>` (parameters map) so the SDK emits proper `{"type":"array","items":{}}` / `{"type":"object"}` schemas. No agent-visible API change.
 - **`revit_send_code_to_revit` returned `<result_1>` placeholder instead of real data.** The plugin previously routed live wire responses through `BakeRedactor.RedactForBake(..., redactResultFields:true)` so any string in the `result` field was replaced by a generated token. The five persistence paths (`McpLogger`, `McpSessionLog`, `JournalEntry`, `AcceptBakeSuggestionHandler`, `UsageEventLogger`) each call `BakeRedactor` independently at write time, so logs/journals/bake suggestions stay redacted regardless of what the wire returns. The wire now returns the raw `output` from the user's `Run(UIApplication)` body — anonymous objects serialize as structured JSON, strings as strings, numbers as numbers, collections as arrays. Agents no longer need to dump to disk + re-read.
 
 ### Migration

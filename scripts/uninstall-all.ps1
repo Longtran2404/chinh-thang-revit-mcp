@@ -1,3 +1,4 @@
+# Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 <#
 .SYNOPSIS
   Remove every RvtMcp artifact from this machine (plugin + server + host configs + discovery + logs).
@@ -9,8 +10,6 @@
     3. MCP host config entries matching rvt-mcp or legacy bimwright-rvt-* in:
        - $env:USERPROFILE\.config\opencode\opencode.json
        - $env:USERPROFILE\.codex\config.toml
-       - $env:USERPROFILE\.claude.json (global, if present)
-       - $env:APPDATA\Claude\claude_desktop_config.json (if present)
        Project-level .mcp.json files are NOT scanned — emits a reminder notice.
     4. Self-contained server, discovery files, and ToolBaker cache in
        %LOCALAPPDATA%\RvtMcp\ (except logs\ when -KeepLogs).
@@ -227,50 +226,6 @@ function Invoke-Step4-Discovery {
     }
 }
 
-function Remove-ClaudeCodeGlobalEntries {
-    $candidates = @(
-        (Join-Path $env:USERPROFILE '.claude.json'),
-        (Join-Path $env:USERPROFILE '.claude\mcp.json'),
-        (Join-Path $env:APPDATA 'Claude\claude_desktop_config.json')
-    )
-
-    $touched = $false
-    foreach ($cfgPath in $candidates) {
-        if (-not (Test-Path $cfgPath)) { continue }
-
-        try {
-            $cfg = Read-JsonHashtable -Path $cfgPath
-        } catch {
-            Write-Warning ("[step3.claude] parse failed at {0} — skipping this file" -f $cfgPath)
-            continue
-        }
-
-        # Claude Code uses 'mcpServers' (plural camelCase) per its docs
-        if (-not $cfg.ContainsKey('mcpServers') -or $cfg['mcpServers'].Count -eq 0) { continue }
-
-        $bimKeys = @($cfg['mcpServers'].Keys | Where-Object { $_ -eq 'rvt-mcp' -or $_ -like 'rvt-mcp-*' -or $_ -eq 'bimwright-rvt' -or $_ -like 'bimwright-rvt-*' })
-        if ($bimKeys.Count -eq 0) { continue }
-
-        foreach ($k in $bimKeys) { $cfg['mcpServers'].Remove($k) | Out-Null }
-        if ($cfg['mcpServers'].Count -eq 0) { $cfg.Remove('mcpServers') | Out-Null }
-
-        if ($PSCmdlet.ShouldProcess($cfgPath, ("Remove {0} rvt-mcp entries" -f $bimKeys.Count))) {
-            $content = $cfg | ConvertTo-Json -Depth 50
-            $bak = Write-ConfigAtomic -Path $cfgPath -Content $content
-            Write-Host ("[step3.claude] removed {0} entries -> {1} (backup: {2})" -f $bimKeys.Count, $cfgPath, $bak)
-        }
-        $touched = $true
-    }
-
-    if ($touched) { $script:handled += 'step3-claude-global' }
-    else          { $script:skipped += 'step3-claude-global' }
-
-    Write-Host ""
-    Write-Host "[step3.claude] NOTE: project-level .mcp.json files are not auto-scanned."
-    Write-Host "               If you added rvt-mcp to any project's .mcp.json manually,"
-    Write-Host "               remove those entries by hand."
-}
-
 function Remove-CodexEntries {
     $cfgPath = Join-Path $env:USERPROFILE '.codex\config.toml'
     if (-not (Test-Path $cfgPath)) {
@@ -347,7 +302,6 @@ $planned = @(
     'Step2: global tool RvtMcp.Server, if present'
     'Step3.opencode: rvt-mcp/bimwright-rvt keys in .config\opencode\opencode.json'
     'Step3.codex: [mcp_servers.rvt-mcp] blocks in .codex\config.toml'
-    'Step3.claude: rvt-mcp/bimwright-rvt in Claude global/Desktop configs'
     'Step4: %LOCALAPPDATA%\RvtMcp\ (self-contained server + discovery + ToolBaker)'
 )
 
@@ -361,7 +315,6 @@ try {
     Invoke-Step2-DotnetTool
     Remove-OpencodeEntries
     Remove-CodexEntries
-    Remove-ClaudeCodeGlobalEntries
     Invoke-Step4-Discovery
 } catch {
     Write-Warning ("[main] unexpected error — summary follows. Error: {0}" -f $_.Exception.Message)

@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Adaptive Bake
 
 Adaptive bake turns repeated local Revit workflows into personal tools only after explicit opt-in and acceptance. It is off by default.
@@ -21,7 +22,6 @@ Or set JSON config:
 
 Config path: `%LOCALAPPDATA%\RvtMcp\rvtmcp.config.json`.
 
-`BIMWRIGHT_ENABLE_ADAPTIVE_BAKE=1` takes effect at the next MCP server start. If you change the flag while a Claude Code session is active, restart the MCP connection with disconnect -> reconnect via `/mcp` so `list_bake_suggestions`, `accept_bake_suggestion`, and `dismiss_bake_suggestion` appear.
 
 `send_code_to_revit` is part of the default ToolBaker surface and does not require adaptive bake. Adaptive bake only adds `list_bake_suggestions`, `accept_bake_suggestion`, `dismiss_bake_suggestion`, and local usage analysis for suggestions.
 

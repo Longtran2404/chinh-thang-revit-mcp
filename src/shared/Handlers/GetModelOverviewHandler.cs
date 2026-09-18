@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace RvtMcp.Plugin.Handlers
     /// <summary>
     /// Returns a markdown summary of the current Revit project for MCP Prompt injection.
     /// Includes project info, active view, category counts, and MEP system names.
-    /// Iteration is capped at 100_000 elements to keep Claude session startup fast on large models.
+    /// Iteration is capped at 100_000 elements to keep MCP session startup fast on large models.
     /// </summary>
     public class GetModelOverviewHandler : IRevitCommand
     {

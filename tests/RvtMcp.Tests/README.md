@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. -->
 # RvtMcp.Tests
 
 xUnit test project. Covers unit-test scope + schema/tool-surface drift snapshot.
@@ -16,7 +17,7 @@ dotnet test tests/RvtMcp.Tests/RvtMcp.Tests.csproj
 
 All tests live in one project; there is no matrix.
 
-If the build fails copying `RvtMcp.Server.exe` because a running MCP session holds it open, add `-c Release` to use a separate output directory, or `/mcp` disconnect in Claude Code first.
+If the build fails copying `RvtMcp.Server.exe` because a running MCP session holds it open, add `-c Release` to use a separate output directory, or disconnect the MCP client first.
 
 ## Golden snapshot — `Golden/tools-list.json`
 

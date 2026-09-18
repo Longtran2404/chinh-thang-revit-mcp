@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System.Text.RegularExpressions;
 
 namespace RvtMcp.Plugin
@@ -6,7 +7,7 @@ namespace RvtMcp.Plugin
     {
         private static readonly Regex[] Patterns = new[]
         {
-            // OpenAI / Anthropic style: sk-... or sk-ant-...
+            // API key style: sk-... or sk-ant-...
             new Regex(@"sk-[A-Za-z0-9_\-]{10,}", RegexOptions.Compiled),
             // Bearer tokens
             new Regex(@"(?i)bearer\s+[A-Za-z0-9_\-\.=]+", RegexOptions.Compiled),

@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -112,7 +113,8 @@ namespace RvtMcp.Plugin.Handlers
                     appearanceAssetObj = new
                     {
                         id = RevitCompat.GetId(appElem.Id),
-                        name = appElem.Name
+                        name = appElem.Name,
+                        rendering_asset = MaterialAppearanceEditor.Inspect(appElem.GetRenderingAsset())
                     };
                 }
             }

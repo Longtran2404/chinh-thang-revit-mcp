@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Khảo sát response quá khổ của MCP tools
 
 > **Trạng thái:** GIAI ĐOẠN 1 — khảo sát tĩnh, chưa sửa code.
@@ -420,5 +421,3 @@
 - Nên ghi cả `plugin_wire_bytes` và `mcp_text_bytes` trong test/telemetry không chứa payload; final context policy nên căn theo `mcp_text_bytes`.
 
 ## 5. Chốt dừng #1
-
-Khảo sát hoàn tất. **Không có product code nào được sửa.** Chờ User + Claude duyệt phân nhóm, ứng viên spill và ngưỡng trước khi sang Giai đoạn 2/Bước 1.

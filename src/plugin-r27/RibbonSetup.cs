@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 using System.Reflection;
 using System.Collections.Generic;
 using Autodesk.Revit.UI;
@@ -16,7 +17,7 @@ namespace RvtMcp.Plugin
 
     public static class RibbonSetup
     {
-        private const string PanelName = "RvtMcp";
+        private const string PanelName = "Chinh Thang MCP";
         private static readonly HashSet<string> CreatedButtons = new HashSet<string>();
 
         public static RibbonResult Create(UIControlledApplication application, RvtMcpConfig config = null, BakedToolRuntimeCache runtimeCache = null)

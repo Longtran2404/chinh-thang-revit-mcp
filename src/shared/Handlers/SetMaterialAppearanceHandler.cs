@@ -1,4 +1,5 @@
-﻿using System;
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Autodesk.Revit.DB;
@@ -11,11 +12,15 @@ namespace RvtMcp.Plugin.Handlers
     public class SetMaterialAppearanceHandler : IRevitCommand
     {
         public string Name => "set_material_appearance";
-        public string Description => "Set shading, transparency, and pattern assets for a material";
+        public string Description => "Set graphics and schema-aware rendering asset properties, textures and physical texture transforms";
 
         public string ParametersSchema => @"{
   ""type"": ""object"",
   ""properties"": {
+    ""appearance_edits_json"": { ""type"": ""string"" },
+    ""source_appearance_asset_id"": { ""type"": ""integer"" },
+    ""duplicate_appearance_asset"": { ""type"": ""boolean"" },
+    ""dry_run"": { ""type"": ""boolean"" },
     ""material_id"": { ""type"": ""integer"" },
     ""material_name"": { ""type"": ""string"" },
     ""red"": { ""type"": ""integer"", ""minimum"": 0, ""maximum"": 255 },
@@ -84,6 +89,15 @@ namespace RvtMcp.Plugin.Handlers
             {
                 return CommandResult.Fail("Either material_id or material_name must be supplied.");
             }
+
+            JArray appearanceEdits;
+            try { appearanceEdits = AppearanceEdits.Parse(request.Value<string>("appearance_edits_json")); }
+            catch (Exception ex) { return CommandResult.Fail("Invalid appearance edits: " + ex.Message); }
+            var sourceAssetId = request.Value<long?>("source_appearance_asset_id");
+            if (sourceAssetId.HasValue && !RevitCompat.CanRepresentElementId(sourceAssetId.Value))
+                return CommandResult.Fail(RevitCompat.ElementIdRangeError(sourceAssetId.Value));
+            var duplicateAsset = request.Value<bool?>("duplicate_appearance_asset") ?? true;
+            var dryRun = request.Value<bool?>("dry_run") ?? false;
 
             // Color preflight
             var redToken = request["red"];
@@ -250,6 +264,17 @@ namespace RvtMcp.Plugin.Handlers
                         changed["cut_background_pattern_id"] = "set";
                     }
 
+                    JObject appearance = null;
+                    if (appearanceEdits.Count > 0 || sourceAssetId.HasValue)
+                        appearance = MaterialAppearanceEditor.Apply(doc, mat, appearanceEdits, sourceAssetId, duplicateAsset);
+                    if (dryRun)
+                    {
+                        var previewId = RevitCompat.GetId(mat.Id);
+                        var previewName = mat.Name;
+                        tx.RollBack();
+                        if (appearance != null) appearance["asset_id"] = null;
+                        return CommandResult.Ok(new { updated = false, dry_run = true, material_id = previewId, name = previewName, changed, appearance, rolled_back = true });
+                    }
                     var status = tx.Commit();
                     if (status != TransactionStatus.Committed)
                         return CommandResult.Fail($"Transaction did not commit. Status: {status}.");
@@ -260,6 +285,7 @@ namespace RvtMcp.Plugin.Handlers
                         material_id = RevitCompat.GetId(mat.Id),
                         name = mat.Name,
                         changed,
+                        appearance,
                         error = (string)null
                     });
                 }

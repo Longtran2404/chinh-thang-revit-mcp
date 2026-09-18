@@ -1,5 +1,6 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 // Usage:
-//   stdio (default):  RvtMcp.Server.exe              — spawned by Claude/GPT/Cursor
+//   stdio (default):  RvtMcp.Server.exe              — spawned by a standard MCP client
 //   HTTP SSE:          RvtMcp.Server.exe --http 8200  — for Ollama/LM Studio/custom
 using System;
 using System.Collections.Concurrent;
@@ -173,7 +174,7 @@ namespace RvtMcp.Server
         {
             var usage = string.Join("\n", new[]
             {
-                "rvt-mcp — Revit MCP server (bimwright.dev)",
+                "Chinh Thang Revit MCP — local Revit MCP server",
                 "",
                 "Usage: rvt-mcp [options]",
                 "",
@@ -236,58 +237,36 @@ namespace RvtMcp.Server
         }
 
         // MCP InitializeResult metadata. ServerInstructions is the single most important
-        // signal for Tool Search discoverability — Claude Code/Desktop's Tool Search ranks
+        // signal for Tool Search discoverability — MCP client Tool Search ranks
         // servers by (1) instructions, (2) literal tool name. Without this populated, an
         // agent asking "list Revit tools" returns nothing even though 224 tools are exposed.
-        // Anthropic truncates this field at 2KB; the keyword-dense first paragraph carries
+        // Some clients truncate this field at 2KB; the keyword-dense first paragraph carries
         // the discoverability load if the SDK or proxy truncates later.
         private static void ConfigureMcpServerOptions(ModelContextProtocol.Server.McpServerOptions opts)
         {
             opts.ServerInfo = new ModelContextProtocol.Protocol.Implementation
             {
-                Name = "rvt-mcp",
-                Title = "Revit MCP",
-                Version = "0.6.1",
+                Name = "chinh-thang-revit-mcp",
+                Title = "Chinh Thang Revit MCP",
+                Version = "1.0.0",
                 Description = "Model Context Protocol gateway for Autodesk Revit 2022-2027",
-                WebsiteUrl = "https://github.com/bimwright/rvt-mcp"
+                WebsiteUrl = "https://github.com/Longtran2404/chinh-thang-revit-mcp"
             };
             opts.ServerInstructions = ServerInstructionsText;
         }
 
-        // Anthropic Tool Search truncates this at 2 KB; the constant below is kept
+        // MCP discovery truncates this at 2 KB; the constant below is kept
         // under 2048 UTF-8 bytes. Lead with the keyword paragraph (highest discriminative
         // signal for queries like "list Revit tools"), then a compact toolset-name index
         // — 2 examples per toolset — so semantic search for individual ops still resolves.
         private const string ServerInstructionsText =
-@"rvt-mcp — MCP gateway for Autodesk Revit 2022-2027. Use whenever user works with .rvt, Revit, BIM, walls, doors, windows, floors, ceilings, roofs, levels, grids, rooms, sheets, schedules, families, views, view templates, view filters, MEP (ducts, pipes, trays, conduits, HVAC, lighting, plumbing), structural (columns, beams, foundations, rebar), dimensions, tags, annotations, keynotes, worksets, phases, links, parameters, materials, IFC, DWG, NWC, PDF.
+@"Chinh Thang Revit MCP: local tools for Revit/BIM walls, doors, windows, furniture, floors, roofs, rooms, sheets, schedules, families, views, MEP, structures, rebar, dimensions, tags, parameters, materials and PDF/IFC/DWG export.
 
-Multi-Revit: if >1 Revit may be open, call revit_list_available_targets THEN revit_switch_target. Years are 2022-2027, not R-codes. Defaults: query,create,view,meta. --toolsets all for export/clash. Do not retry clash/export after 60s timeout.
+MODELING POLICY: Read revit://guidance/native-modeling before modeling. Use native Revit Walls and correctly hosted Door/Window Families. Furniture MUST be editable loadable .rfa Families with native parametric geometry, reference planes, dimensions and material parameters. Verify Edit Family, Edit Type and instance Properties by changing dimensions and materials. Do not substitute DirectShape, imported meshes or images for editable furniture, walls or doors. Use native Revit details where applicable.
 
-Tools (prefix revit_<verb>_<noun>, lengths in mm):
-- query: get_current_view_info, ai_element_filter, get_element_details
-- create: create_grid, create_level, create_room
-- modify: operate_element, set_element_parameter_values
-- delete: delete_element
-- view: create_view, capture_view_image
-- sheets: create_sheet, renumber_sheets
-- schedule: create_schedule, list_schedules
-- families: list_loaded_families, load_family_from_path
-- mep: create_duct, create_pipe, analyze_mep_network
-- annotation: tag_elements, create_dimensions
-- graphics: create_view_filter, override_element_graphics
-- export: export_pdf, export_dwg, export_ifc, export_nwc
-- materials: list_materials, assign_material_to_element
-- geometry: clash_detection, measure_distance_between_elements
-- rooms: list_rooms, compute_room_finishes
-- links: project coordinates, link/acquire/publish
-- parameters: create_shared_parameter, create_project_parameter
-- organization: apply_view_template, save_selection
-- workflows: workflow_clash_review, workflow_model_audit
-- structural: create_structural_column, create_rebar_set
-- kei: query_kei_database, import_project_equipment
-- meta: send_code_to_revit, batch_execute, list_available_targets, switch_target
-- lint: find_untagged_elements, get_model_warnings_summary
-- toolbaker: list_baked_tools, run_baked_tool";
+MATERIALS: Reuse project Materials first. Missing textures may come from image generation or licensed material libraries through the client's tools. Record source/license, keep stable local image paths, assign real Revit Materials with Appearance Assets and correct physical texture scale. Images are surface textures, not family geometry. Family Editor authoring and bitmap assignment are not fully covered by typed tools; use verified Revit API code or native UI and report unverified work honestly.
+
+Start with revit_get_current_view_info. Multiple sessions: revit_list_available_targets then revit_switch_target (year 2022-2027). Lengths in mm. Default toolsets: query,create,view,meta; --toolsets all enables the full catalog; --read-only removes write tools. Use typed tools first; revit_send_code_to_revit handles C# API gaps. Preserve transactions/undo. Do not retry long exports blindly. Never modify an original project without authorization.";
 
         private static bool IncludeSendCode(HashSet<string> enabled, RvtMcpConfig config)
         {
@@ -3129,8 +3108,8 @@ Tools (prefix revit_<verb>_<noun>, lengths in mm):
             catch (Exception ex) { return $"Error: {ex.Message}"; }
         }
 
-        [McpServerTool(Name = "revit_set_material_appearance", Destructive = false), System.ComponentModel.Description("Set shading, transparency, and pattern assets for a material")]
-        public static async Task<string> SetMaterialAppearance(long? materialId = null, string materialName = "", int? red = null, int? green = null, int? blue = null, int? transparency = null, int? shininess = null, int? smoothness = null, bool? useRenderAppearanceForShading = null, long? surfaceForegroundPatternId = null, long? surfaceBackgroundPatternId = null, long? cutForegroundPatternId = null, long? cutBackgroundPatternId = null)
+        [McpServerTool(Name = "revit_set_material_appearance", Destructive = false), System.ComponentModel.Description("Set graphics and render/PBR asset properties. First inspect get_material_properties(includeAssets=true). appearanceEditsJson is an array of {path:[exact schema property names],value:scalar or array} or {path:[...],bitmap:{file:absolute local path,scaleXmm,scaleYmm,rotationDegrees,invert}}. Supports roughness/highlights/reflectivity/normal/cutout/transmission/emission channels exposed by the actual asset schema; never assumes cross-renderer equivalence. Defaults to a private asset copy. dryRun validates then rolls back. Unsupported channels fail the whole transaction.")]
+        public static async Task<string> SetMaterialAppearance(long? materialId = null, string materialName = "", int? red = null, int? green = null, int? blue = null, int? transparency = null, int? shininess = null, int? smoothness = null, bool? useRenderAppearanceForShading = null, long? surfaceForegroundPatternId = null, long? surfaceBackgroundPatternId = null, long? cutForegroundPatternId = null, long? cutBackgroundPatternId = null, string appearanceEditsJson = "", long? sourceAppearanceAssetId = null, bool duplicateAppearanceAsset = true, bool dryRun = false)
         {
             try
             {
@@ -3148,7 +3127,11 @@ Tools (prefix revit_<verb>_<noun>, lengths in mm):
                     surface_foreground_pattern_id = surfaceForegroundPatternId,
                     surface_background_pattern_id = surfaceBackgroundPatternId,
                     cut_foreground_pattern_id = cutForegroundPatternId,
-                    cut_background_pattern_id = cutBackgroundPatternId
+                    cut_background_pattern_id = cutBackgroundPatternId,
+                    appearance_edits_json = appearanceEditsJson,
+                    source_appearance_asset_id = sourceAppearanceAssetId,
+                    duplicate_appearance_asset = duplicateAppearanceAsset,
+                    dry_run = dryRun
                 });
                 return JsonConvert.SerializeObject(result, Formatting.Indented);
             }

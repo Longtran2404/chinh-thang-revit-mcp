@@ -1,3 +1,4 @@
+# Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md.
 # C# Build
 bin/
 obj/
@@ -28,12 +29,8 @@ tests/server-staging/
 # Never goes public. Single catch-all. See .private/README.md for index.
 .private/
 
-# Claude Code
-.claude/
-# Ignore stray/nested CLAUDE.md (local agent notes) but track the repo-root
-# project guide — it is the canonical per-project doc referenced from the family README.
-CLAUDE.md
-!/CLAUDE.md
+# Local agent settings
+.*agent*/
 
 # Agent session notes / local changelog drafts
 .Codex/
@@ -76,3 +73,13 @@ publish/
 
 # Local AI review sessions (prompt + output dumps)
 runs/
+
+# Never publish personal data, local credentials or Revit model files
+.env
+.env.*
+*.rvt
+*.rfa
+*.rte
+*.bak
+*.zip
+TestResults/

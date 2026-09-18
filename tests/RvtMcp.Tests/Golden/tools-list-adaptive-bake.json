@@ -5429,9 +5429,13 @@
     },
     {
       "name": "revit_set_material_appearance",
-      "description_hash": "sha256:65be5e28af6acb59dedd1e996b8bcbe02d82dc43e9a1884117fe8e0a19febf42",
+      "description_hash": "sha256:888c28b7c921ae2b6949ef9f82bd1bd82182429dfa66f3a9329e5095f2c01e2f",
       "inputSchema": {
         "properties": {
+          "appearanceEditsJson": {
+            "description": "",
+            "type": "String"
+          },
           "blue": {
             "description": "",
             "type": "Nullable`1"
@@ -5443,6 +5447,14 @@
           "cutForegroundPatternId": {
             "description": "",
             "type": "Nullable`1"
+          },
+          "dryRun": {
+            "description": "",
+            "type": "Boolean"
+          },
+          "duplicateAppearanceAsset": {
+            "description": "",
+            "type": "Boolean"
           },
           "green": {
             "description": "",
@@ -5465,6 +5477,10 @@
             "type": "Nullable`1"
           },
           "smoothness": {
+            "description": "",
+            "type": "Nullable`1"
+          },
+          "sourceAppearanceAssetId": {
             "description": "",
             "type": "Nullable`1"
           },

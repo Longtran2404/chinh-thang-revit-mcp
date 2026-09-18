@@ -1,3 +1,4 @@
+<!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # MCP Configuration for OpenAI Codex (CLI, Desktop, IDE Extension)
 
 > **Audience:** anyone wiring `RvtMcp.Server.exe` (or any other stdio MCP server) into one of OpenAI's Codex clients.
@@ -5,7 +6,6 @@
 
 Codex is OpenAI's coding agent. It ships as three surfaces that talk to the same model but have **different config-loading rules** — this matters because a setup that works in Codex CLI may silently fail in Codex Desktop.
 
-For Anthropic clients (Claude Code CLI, Claude Code VS Code extension, Claude Desktop), see [`mcp-config-claude-clients.md`](./mcp-config-claude-clients.md).
 
 ---
 
@@ -136,7 +136,6 @@ codex mcp add rvt-mcp \
 codex mcp add rvt-mcp-2024 -- "%LOCALAPPDATA%\\RvtMcp\\server\\0.5.0\\RvtMcp.Server.exe" --target 2024
 ```
 
-The `--` separates Codex's own flags from the command + args passed to the MCP server, identical convention to `claude mcp add`.
 
 Other commands:
 
@@ -216,21 +215,16 @@ codex mcp list                    # CLI
 
 ## 7. Tool exposure to the agent
 
-Codex's docs do not currently publish the exact prefix format Codex uses internally for MCP tool names (Anthropic publishes `mcp__<server>__<tool>` with a 64-char limit; OpenAI has not documented an equivalent). Empirically Codex prefixes tools with the server name but accepts longer names than Claude Code's 64-char ceiling. Until OpenAI publishes a spec, **keep tool names ≤ 51 chars** to stay safe across both vendors.
 
 For RvtMcp v0.5+ (longest tool name = `revit_measure_distance_between_elements` at 39 chars), this is well within both limits.
 
 ---
 
-## 8. Comparison cheat-sheet vs Anthropic clients
 
-| Aspect | Claude Code (CLI + VS Code ext.) | Claude Desktop | Codex CLI + IDE ext. | Codex Desktop |
 |---|---|---|---|---|
 | Config format | JSON | JSON | **TOML** | **TOML** |
 | Top-level key | `mcpServers` | `mcpServers` | `mcp_servers` | `mcp_servers` |
-| User-scope path (Windows) | `%USERPROFILE%\.claude.json` | `%APPDATA%\Claude\claude_desktop_config.json` | `%USERPROFILE%\.codex\config.toml` | `%USERPROFILE%\.codex\config.toml` |
 | Project-scope file | `.mcp.json` at repo root | ❌ Not supported | `.codex/config.toml` + `trust_level="trusted"` | ❌ Bug #13025 — silently ignored |
-| Add via CLI | `claude mcp add` | n/a (edit JSON) | `codex mcp add` | n/a (edit TOML) |
 | Per-server timeout | Global `MCP_TIMEOUT` env | Same | `startup_timeout_sec`, `tool_timeout_sec` | Same |
 | Tool filter | Permissions/allowlist patterns | Same | `enabled_tools`, `disabled_tools` | Same |
 | Per-tool approval | Permission rules in settings | Same | `default_tools_approval_mode` + per-tool overrides | Same |

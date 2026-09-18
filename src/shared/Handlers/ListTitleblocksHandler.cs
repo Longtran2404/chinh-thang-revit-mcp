@@ -1,3 +1,4 @@
+// Modified for Chinh Thang Revit MCP, 2026-09-18: net48 compatibility.
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -82,9 +83,9 @@ namespace RvtMcp.Plugin.Handlers
                         continue;
 
                     if (!string.IsNullOrEmpty(namePattern) &&
-                        !displayName.Contains(namePattern, StringComparison.OrdinalIgnoreCase) &&
-                        !familyName.Contains(namePattern, StringComparison.OrdinalIgnoreCase) &&
-                        !typeName.Contains(namePattern, StringComparison.OrdinalIgnoreCase))
+                        displayName.IndexOf(namePattern, StringComparison.OrdinalIgnoreCase) < 0 &&
+                        familyName.IndexOf(namePattern, StringComparison.OrdinalIgnoreCase) < 0 &&
+                        typeName.IndexOf(namePattern, StringComparison.OrdinalIgnoreCase) < 0)
                     {
                         continue;
                     }
