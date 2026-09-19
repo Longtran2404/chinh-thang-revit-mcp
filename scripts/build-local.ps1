@@ -5,11 +5,14 @@ param([string]$Dotnet, [switch]$SkipTests)
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $PSScriptRoot
 if (-not $Dotnet) {
-    $found = Get-Command dotnet -ErrorAction SilentlyContinue
-    if ($found) { $Dotnet = $found.Source }
-    else { $Dotnet = Join-Path $env:LOCALAPPDATA 'ChinhThangRevitMcp\sdk\dotnet.exe' }
+    $bundledSdk = Join-Path $env:LOCALAPPDATA 'ChinhThangRevitMcp\sdk\dotnet.exe'
+    if (Test-Path -LiteralPath $bundledSdk) { $Dotnet = $bundledSdk }
+    else {
+        $found = Get-Command dotnet -ErrorAction SilentlyContinue
+        if ($found) { $Dotnet = $found.Source }
+    }
 }
-if (-not (Test-Path -LiteralPath $Dotnet)) { throw 'Install the .NET 8 SDK or pass -Dotnet with its absolute path.' }
+if (-not $Dotnet -or -not (Test-Path -LiteralPath $Dotnet)) { throw 'Install the .NET 8 SDK or pass -Dotnet with its absolute path.' }
 $env:DOTNET_CLI_TELEMETRY_OPTOUT = '1'
 function Invoke-Dotnet([string[]]$Arguments) {
     & $Dotnet @Arguments
@@ -17,7 +20,7 @@ function Invoke-Dotnet([string[]]$Arguments) {
 }
 Push-Location $root
 try {
-    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.2.0-win-x64'
+    $package = Join-Path $root 'artifacts\ChinhThangRevitMcp-1.2.1-win-x64'
     if (Test-Path -LiteralPath $package) {
         # Do not mix old and new build outputs; keep the previous package intact.
         Move-Item -LiteralPath $package -Destination ($package + '.previous-' + (Get-Date -Format 'yyyyMMddHHmmssfff'))

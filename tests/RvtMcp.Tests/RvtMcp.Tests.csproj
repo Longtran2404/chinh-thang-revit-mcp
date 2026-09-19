@@ -18,6 +18,7 @@
     See `Checklist-Bimwright-v0.1.0.md` P2-001 scope — "Option 2 refined".
   -->
   <ItemGroup>
+    <Compile Include="..\..\src\shared\Infrastructure\RebarContinuityMath.cs" Link="Shared\RebarContinuityMath.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\SteelDetailInput.cs" Link="Shared\SteelDetailInput.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\HseIssueRules.cs" Link="Shared\HseIssueRules.cs" />
     <Compile Include="..\..\src\shared\Infrastructure\RebarPathInput.cs" Link="Shared\RebarPathInput.cs" />

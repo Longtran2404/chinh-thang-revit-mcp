@@ -271,6 +271,7 @@ namespace RvtMcp.Plugin
             Register(new Handlers.CreateRebarSpliceHandler());
             Register(new Handlers.CreateSmartSteelNodeHandler());
             Register(new Handlers.CreateCheckedConcreteAnchorsHandler());
+            Register(new Handlers.AuditRebarConnectionsHandler());
 
             Register(new Handlers.GetDetailingCatalogHandler());
             Register(new Handlers.CreateSteelConnectionHandler());

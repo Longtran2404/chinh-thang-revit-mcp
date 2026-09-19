@@ -248,7 +248,7 @@ namespace RvtMcp.Server
             {
                 Name = "chinh-thang-revit-mcp",
                 Title = "Chinh Thang Revit MCP",
-                Version = "1.2.0",
+                Version = "1.2.1",
                 Description = "Model Context Protocol gateway for Autodesk Revit 2022-2027",
                 WebsiteUrl = "https://github.com/Longtran2404/chinh-thang-revit-mcp"
             };
@@ -2470,7 +2470,14 @@ Start with revit_get_current_view_info. Multiple sessions: revit_list_available_
             catch(Exception ex) { return "Error: "+ex.Message; }
         }
 
-        [McpServerTool(Name = "revit_create_designed_rebar"), System.ComponentModel.Description("Create native shape-driven Rebar with calculated end anchorage using an explicit implemented standard. JSON: host_id,bar_type_id,body_points_json at critical sections,normal_x/y/z,design,start_anchor/end_anchor {enabled,style Straight|Up|Down,horizontal_embedment_mm}, layout options,dry_run. replace_component_id reuses stored recipe for toggles; refuses unmanaged bars. Disabled anchors are explicitly flagged for design review.")]
+        [McpServerTool(Name = "revit_audit_rebar_connections"), System.ComponentModel.Description("Read-only bounded reinforcement audit. request_json: {rebar_ids:[ids],max_gap_mm:500}. 1-250 native Rebar sets, all actual bar positions; fails explicitly on budget overflow. Reports complete-path duplicates, parallel straight-body overlaps and coaxial end-gap candidates across hosts. Couplers/intentional free ends require review. No findings does NOT certify anchorage, lap length, cover, curved/nonparallel clashes or capacity. Audit connected columns, beams, flights and landings together before handover.")]
+        public static async Task<string> AuditRebarConnections(string request_json)
+        {
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("audit_rebar_connections",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_designed_rebar"), System.ComponentModel.Description("Create native shape-driven Rebar with calculated end anchorage using an explicit implemented standard. JSON: host_id,bar_type_id,body_points_json at critical sections,normal_x/y/z,design,start_anchor/end_anchor {enabled,style Straight|Up|Down,horizontal_embedment_mm,receiving_host_id when enabled,disabled_reason when disabled}, layout options,dry_run. Checks actual anchor centreline length inside receiving concrete for every bar position; rollback on failure or duplicate/parallel body overlap. Cover, joint continuity and capacity remain unverified. replace_component_id reuses stored recipe for toggles; refuses unmanaged bars.")]
         public static async Task<string> CreateDesignedRebar(string request_json)
         {
             var blocked=ServerState.BlockIfReadOnly("create_designed_rebar");if(blocked!=null)return blocked;

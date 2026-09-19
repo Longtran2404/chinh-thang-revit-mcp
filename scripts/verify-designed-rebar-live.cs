@@ -50,11 +50,11 @@ public class McpDynamicScript
    report["failed_replacement_preserves_originals"]=true;
    report["supports"]=placed;report["supports_dry_run_and_replace"]=true;
    var design=JObject.Parse(@"{'standard':'TCVN5574:2018','steel_stress':'Tension','surface':'HotRolledRibbed','diameter_mm':16,'rs_mpa':350,'rbt_mpa':1.05,'as_required_mm2':201,'as_provided_mm2':201,'concrete_kind':'NormalWeight','spliced_percent':50}");
-   var request=new JObject{["host_id"]=floor.Id.Value,["bar_type_id"]=bar.Id.Value,["body_points_json"]="[[1500,1000,-40],[4500,1000,-40]]",["normal_x"]=0,["normal_y"]=1,["normal_z"]=0,["design"]=design,["start_anchor"]=new JObject{["enabled"]=true,["style"]="Down",["horizontal_embedment_mm"]=400},["end_anchor"]=new JObject{["enabled"]=true,["style"]="Down",["horizontal_embedment_mm"]=400}};
+   var request=new JObject{["host_id"]=floor.Id.Value,["bar_type_id"]=bar.Id.Value,["body_points_json"]="[[1500,1000,-40],[4500,1000,-40]]",["normal_x"]=0,["normal_y"]=1,["normal_z"]=0,["design"]=design,["start_anchor"]=new JObject{["enabled"]=true,["style"]="Down",["horizontal_embedment_mm"]=400,["receiving_host_id"]=floor.Id.Value},["end_anchor"]=new JObject{["enabled"]=true,["style"]="Down",["horizontal_embedment_mm"]=400,["receiving_host_id"]=floor.Id.Value}};
    var anchored=Result(CreateDesignedRebarHandler.Create(d,request));long anchoredId=anchored.Value<long>("created_id");
    var curves=((Rebar)d.GetElement(new ElementId(anchoredId))).GetCenterlineCurves(false,false,false,MultiplanarOption.IncludeAllMultiplanarCurves,0);
    if(curves.First().GetEndPoint(0).Z>=-40/304.8||curves.Last().GetEndPoint(1).Z>=-40/304.8||Math.Abs(curves.Sum(c=>c.Length)*304.8-(3000+2*535))>0.1)throw new Exception("Downturned ends or real anchor length mismatch");
-   var toggle=Result(CreateDesignedRebarHandler.Create(d,new JObject{["replace_component_id"]=anchoredId,["start_anchor"]=new JObject{["enabled"]=false}}));
+   var toggle=Result(CreateDesignedRebarHandler.Create(d,new JObject{["replace_component_id"]=anchoredId,["start_anchor"]=new JObject{["enabled"]=false,["disabled_reason"]="QA intentional disabled end, not a verified joint"}}));
    if(d.GetElement(new ElementId(anchoredId))!=null||toggle.Value<bool>("start_anchor_enabled"))throw new Exception("Anchor toggle did not replace managed bar");
    report["both_ends_down_and_real_length_verified"]=true;report["independent_anchor_toggle"]=true;
    var splice=new JObject{["mode"]="CrankedLap",["host_id"]=floor.Id.Value,["bar_type_id"]=bar.Id.Value,["start_mm"]=new JArray(500,1500,-100),["end_mm"]=new JArray(5500,1500,-100),["splice_center_mm"]=new JArray(3000,1500,-100),["offset_direction"]=new JArray(0,0,1),["centerline_offset_mm"]=32,["crank_run_mm"]=192,["design"]=design};

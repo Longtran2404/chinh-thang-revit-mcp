@@ -123,10 +123,13 @@ namespace RvtMcp.Plugin.Handlers
                         }
                     }
 
-                    tx.Commit();
+                    RebarConnectionAudit.RejectOverlaps(doc,rebar);
+                    if(tx.Commit()!=TransactionStatus.Committed)return CommandResult.Fail("Revit rolled back the rebar set.");
                     return CommandResult.Ok(new
                     {
                         created_id = RevitCompat.GetId(rebar.Id),
+                        connection_verified = false,
+                        construction_ready = false,
                         host_id = RevitCompat.GetId(host.Id),
                         bar_type_id = RevitCompat.GetId(barType.Id),
                         layout_rule = rule.Value.ToString(),

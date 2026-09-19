@@ -33,3 +33,5 @@ The Git history retains upstream authorship. Source files with edits carry chang
 
 - Version 1.2: explicit bounded TCVN/EC2 rebar calculations, project/region support settings, anchorage recipes, native couplers, lap pairs and I-member centroid node tools. Calculation/layout unit tests passed; see verification.md for native runtime limitations.
 - Added four architecture/MEP/HSE workflow tools, including a document-local HSE register with validation, revision retention and pagination. Revit scratch-model checks and typed MCP calls passed. Current surface: 244 standard / 247 adaptive tools.
+
+2026-09-19: 1.2.1 rebar connection audit, creation overlap guards, receiving-concrete anchorage checks and reproducible scratch tests.

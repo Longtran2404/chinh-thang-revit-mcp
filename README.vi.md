@@ -1,7 +1,7 @@
 <!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Chính Thắng Revit MCP
 
-![MCP tools](https://img.shields.io/badge/MCP-245%20tools-blue)
+![MCP tools](https://img.shields.io/badge/MCP-246%20tools-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
 MCP chạy cục bộ để kết nối AI client với Autodesk Revit. Bản riêng của **Minh Long Tran / Chính Thắng**, phát triển từ [bimwright/rvt-mcp](https://github.com/bimwright/rvt-mcp).
@@ -38,8 +38,8 @@ Xem thêm [material/PBR](docs/material-appearance.md) và [toàn bộ quy trình
 | Chế độ | Số tools | Ghi chú |
 |---|---:|---|
 | Mặc định | **40** | query, create, view, meta |
-| `--toolsets all` | **245** | Bộ cài bản riêng dùng chế độ này |
-| `all` + adaptive bake | **248** | Thêm quản lý gợi ý; mặc định tắt |
+| `--toolsets all` | **246** | Bộ cài bản riêng dùng chế độ này |
+| `all` + adaptive bake | **249** | Thêm quản lý gợi ý; mặc định tắt |
 
 Dùng `--read-only` nếu chỉ muốn đọc. Đơn vị chiều dài tại biên MCP là mm. AI client vẫn có thể gửi nội dung tool cho dịch vụ AI mà bạn đang sử dụng.
 
@@ -57,7 +57,7 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 545 unit tests, build Revit 2024, 245 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 545 unit tests, build Revit 2024, 246 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 
@@ -76,3 +76,7 @@ Bản 1.1 bổ sung Rebar nhiều đoạn cho neo, cầu thang gấp khúc, sàn
 Đã thêm kiểm tra phòng/family/vật liệu, connector và độ dốc MEP, biên sàn/lỗ mở cần kiểm tra HSE, cùng sổ xử lý HSE lưu trong RVT. Bốn công cụ đã được thử trực tiếp trên mô hình riêng trong Revit 2024. Xem [phạm vi và cách dùng](docs/architecture-mep-hse.md). Đây là công cụ rà soát BIM, chưa phải bộ thiết kế hoặc chứng nhận an toàn đầy đủ.
 
 Phần neo/nối theo tiêu chuẩn và component kết cấu mới có phạm vi giới hạn; xem [hướng dẫn](docs/detailing-design.md) và [trạng thái kiểm chứng](docs/verification.md).
+
+### Cập nhật 1.2.1: kiểm tra cốt thép tại nút
+
+Có thêm công cụ kiểm tra khe hở thép cột và chồng/trùng đường thép. Các lệnh tạo bộ thép, thép đường dẫn và đai có chốt kiểm tra trùng/chồng dọc. Lệnh tính và tạo thép neo yêu cầu cấu kiện nhận neo, kiểm tra đường tim đoạn neo thực trong bê tông. Xem [phạm vi, giới hạn và thay đổi đầu vào](docs/detailing-design.md#rebar-connection-guards--121). Những kiểm tra này không tự sửa thép cũ hoặc chứng nhận toàn bộ cấu tạo đạt tiêu chuẩn.

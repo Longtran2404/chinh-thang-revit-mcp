@@ -43,9 +43,19 @@ namespace RvtMcp.Plugin.Handlers
             var start=p["start_anchor"] as JObject;var end=p["end_anchor"] as JObject;
             if(start==null||end==null)throw new ArgumentException("Specify start_anchor and end_anchor with enabled and style.");
             var startCalc=AnchorDesign(design,start);var endCalc=AnchorDesign(design,end);
+            RebarAnchorageGuard.ValidateContext(d,start);RebarAnchorageGuard.ValidateContext(d,end);
             double minimum=Math.Max(startCalc.Value<double>("minimum_bend_diameter_mm"),endCalc.Value<double>("minimum_bend_diameter_mm"));
             if(type.StandardBendDiameter*304.8+0.01<minimum && (body.Count>2 || start.Value<string>("style")!="Straight" || end.Value<string>("style")!="Straight"))throw new ArgumentException("Selected bar type bend diameter is below the calculated selected standard minimum. Duplicate/edit the bar type explicitly; shared types are not changed automatically.");
             double radius=(type.StandardBendDiameter*304.8+diameter)/2;
+            foreach(var pair in new[]{new[]{start,startCalc},new[]{end,endCalc}}) {
+                var anchor=pair[0];var calculation=pair[1];double required=calculation.Value<double>("required_length_mm");
+                double actual=required;
+                if(anchor.Value<bool>("enabled")&&anchor.Value<string>("style")!="Straight") {
+                    double run=DetailingDesign.Required(anchor,"horizontal_embedment_mm");
+                    actual=run+Math.Max(radius+1,required-run+(2-Math.PI/2)*radius)-(2-Math.PI/2)*radius;
+                }
+                calculation["modeled_anchor_length_mm"]=anchor.Value<bool>("enabled")?actual:0;
+            }
             var resultPoints=new List<XYZ>();
             resultPoints.AddRange(EndPoints(body[0],(body[0]-body[1]).Normalize(),start,startCalc,radius).Reverse());
             resultPoints.AddRange(body);
@@ -63,12 +73,15 @@ namespace RvtMcp.Plugin.Handlers
                 }
                 var r=CreateRebarPathHandler.Create(d,req);if(!r.Success)throw new InvalidOperationException(r.Error);
                 var data=JObject.FromObject(r.Data);var bar=d.GetElement(RevitCompat.ToElementId(data.Value<long>("created_id")));
+                RebarAnchorageGuard.Verify(d,(Rebar)bar,resultPoints[0]/304.8,start,end,startCalc,endCalc);
                 using(var tx=new Transaction(d,"Chinh Thang: Store design recipe")){
                     tx.Start();p.Remove("replace_component_id");p.Remove("dry_run");
                     DetailingStorage.Write(bar,new JObject{["kind"]="DesignedRebar",["request"]=p,["start_calculation"]=startCalc,["end_calculation"]=endCalc});
                     if(tx.Commit()!=TransactionStatus.Committed)throw new InvalidOperationException("Could not store the component recipe.");
                 }
                 data["start_calculation"]=startCalc;data["end_calculation"]=endCalc;data["start_anchor_enabled"]=start.Value<bool>("enabled");data["end_anchor_enabled"]=end.Value<bool>("enabled");
+                data["enabled_anchor_centrelines_in_receiving_concrete"]=true;
+                data["connection_verified"]=false;data["cover_verified"]=false;data["construction_ready"]=false;
                 data["dry_run"]=dry;data["replaced_component_id"]=previous;data["anchor_check_status"]=start.Value<bool>("enabled")&&end.Value<bool>("enabled") ? "Calculated length; verify cover and containment at critical sections" : "ANCHORAGE_DISABLED_REQUIRES_DESIGN_REVIEW";
                 if(dry){group.RollBack();data["created_id"]=null;}else group.Assimilate();
                 return CommandResult.Ok(data);

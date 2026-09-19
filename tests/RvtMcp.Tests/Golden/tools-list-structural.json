@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 24,
+  "tool_count": 25,
   "tools": [
     {
       "name": "revit_analyze_structural_connections",
@@ -17,6 +17,22 @@
           }
         },
         "required": [],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_audit_rebar_connections",
+      "description_hash": "sha256:1c55f68c118fa951e445a18ef959c32465788bf5497c837f7744fc637f5c9959",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
+        ],
         "type": "object"
       }
     },
@@ -54,7 +70,7 @@
     },
     {
       "name": "revit_create_designed_rebar",
-      "description_hash": "sha256:eb54dc30af9deeb1f1c1758180dfb9c7c83ce6eb9c12d5eb8814c1f04c62c77b",
+      "description_hash": "sha256:d761aac365d17bb4d1302f832890bca5fb1fdfee0bd144650e37a84e62acb2e1",
       "inputSchema": {
         "properties": {
           "request_json": {

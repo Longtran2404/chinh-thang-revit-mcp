@@ -78,7 +78,8 @@ namespace RvtMcp.Plugin.Handlers
                     }
                 }
                 doc.Regenerate();
-                var result = new { dry_run=dry, created_id=dry ? (long?)null : RevitCompat.GetId(bar.Id), host_id=RevitCompat.GetId(host.Id), bar_type_id=RevitCompat.GetId(barType.Id), mode, requested_layout=rule, quantity=bar.Quantity, distribution_length_mm=length, bend_diameter_mm=barType.StandardBendDiameter*304.8, native_type=bar.GetType().FullName, constraint_note=mode=="FreeForm" ? "Unconstrained free-form Rebar: edit geometry via RebarFreeFormAccessor.SetCurves; host-face constraints cannot be added later." : "Shape-driven native Rebar. Check/adjust host-face constraints in Revit.", design_check="Geometry only. Anchorage, laps, cover and clashes require project-specific review." };
+                RebarConnectionAudit.RejectOverlaps(doc,bar);
+                var result = new { construction_ready=false, connection_verified=false, duplicate_parallel_overlap_check="passed within bounded scope", dry_run=dry, created_id=dry ? (long?)null : RevitCompat.GetId(bar.Id), host_id=RevitCompat.GetId(host.Id), bar_type_id=RevitCompat.GetId(barType.Id), mode, requested_layout=rule, quantity=bar.Quantity, distribution_length_mm=length, bend_diameter_mm=barType.StandardBendDiameter*304.8, native_type=bar.GetType().FullName, constraint_note=mode=="FreeForm" ? "Unconstrained free-form Rebar: edit geometry via RebarFreeFormAccessor.SetCurves; host-face constraints cannot be added later." : "Shape-driven native Rebar. Check/adjust host-face constraints in Revit.", design_check="Geometry only. Anchorage, laps, cover and clashes require project-specific review." };
                 if (tx.Commit()!=TransactionStatus.Committed) return CommandResult.Fail("Revit rolled back the requested geometry: "+string.Join("; ",failures.Messages));
                 if (dry) group.RollBack(); else group.Assimilate();
                 return CommandResult.Ok(result);

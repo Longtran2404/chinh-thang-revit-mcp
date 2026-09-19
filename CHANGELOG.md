@@ -1,3 +1,10 @@
+## 1.2.1 — 2026-09-19
+
+- `--toolsets all` **246**, adaptive bake **249**, including read-only rebar connection audit.
+- Native rebar path/set/stirrup creation rejects duplicate paths and parallel-body penetration atomically.
+- Designed anchors require receiving concrete and verify actual end-centreline embedment for every distribution position; disabled ends require an explicit reason.
+- Explicit incomplete-design status and documented audit scope; no automatic repair/capacity certification.
+
 ## Unreleased - checked anchors and stiffeners
 
 - `--toolsets all` **245**, adaptive bake **248**.

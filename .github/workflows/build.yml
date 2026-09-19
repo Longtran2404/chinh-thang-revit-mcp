@@ -23,11 +23,11 @@ jobs:
         shell: pwsh
         run: ./scripts/build-local.ps1
       - name: Verify MCP stdio handshake
-        run: python scripts/smoke-test.py artifacts/ChinhThangRevitMcp-1.2.0-win-x64/server/RvtMcp.Server.exe
+        run: python scripts/smoke-test.py artifacts/ChinhThangRevitMcp-1.2.1-win-x64/server/RvtMcp.Server.exe
       - uses: actions/upload-artifact@v4
         with:
-          name: ChinhThangRevitMcp-1.2.0-win-x64
-          path: artifacts/ChinhThangRevitMcp-1.2.0-win-x64.zip
+          name: ChinhThangRevitMcp-1.2.1-win-x64
+          path: artifacts/ChinhThangRevitMcp-1.2.1-win-x64.zip
       - uses: actions/upload-artifact@v4
         if: always()
         with:

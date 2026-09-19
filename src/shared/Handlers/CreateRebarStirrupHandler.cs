@@ -70,7 +70,8 @@ namespace RvtMcp.Plugin.Handlers
                         return CommandResult.Fail("Rebar.CreateFromRebarShape returned null.");
                     }
 
-                    tx.Commit();
+                    RebarConnectionAudit.RejectOverlaps(doc,rebar);
+                    if(tx.Commit()!=TransactionStatus.Committed)return CommandResult.Fail("Revit rolled back the stirrup.");
                     return CommandResult.Ok(new
                     {
                         created_id = RevitCompat.GetId(rebar.Id),

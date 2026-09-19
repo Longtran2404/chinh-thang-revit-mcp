@@ -34,3 +34,12 @@ Các tool có sẵn hỗ trợ đọc/nạp/đổi tên/xuất Family, đặt Fa
 Bản riêng đã mở rộng đọc/chỉnh Appearance Asset và texture theo schema qua `get_material_properties` / `set_material_appearance`, gồm dry-run và rollback. Xem `material-appearance.md` để phân biệt Graphics với render/PBR và phạm vi từng kênh.
 
 Source upstream chưa có bộ tool chuyên dụng bao phủ toàn bộ Family Editor hay dịch vụ tìm/tạo texture. Với trường hợp thiếu typed tool, có thể triển khai C# qua `revit_send_code_to_revit` sử dụng Revit API hoặc thao tác trực tiếp trong Revit; phải kiểm tra đúng version, transaction, document context và kết quả thực. Việc có quy tắc này không có nghĩa các khả năng còn thiếu đã được lập trình hoặc nghiệm thu.
+
+
+## Cốt thép qua nút và nghiệm thu hình học
+
+- Trước khi tạo thép chịu lực, đọc cả cấu kiện nhận neo/nối và chi tiết nguồn. Dầm–cột, vế thang–chiếu nghỉ, chiếu nghỉ–dầm và cột giữa các tầng phải có đường thép/neo/nối rõ ràng; không kết thúc độc lập ở mặt host rồi coi là hoàn thành.
+- Dùng `create_designed_rebar` với `receiving_host_id` cho từng đầu neo; đầu tắt neo phải có `disabled_reason`. Công cụ kiểm tra chiều dài đường tim neo thực trong bê tông nhận neo, chưa kiểm tra lớp bảo vệ toàn tiết diện thanh.
+- Chạy `audit_rebar_connections` cho các bộ thép ở cả hai phía nút; kiểm tra mọi vị trí rải. Không có phát hiện trong kiểm tra giới hạn không đồng nghĩa đã đạt tiêu chuẩn.
+- Kiểm tra riêng uốn/giao cắt, lớp bảo vệ, chiều dài nối, so le và coupler. Không xóa thanh chỉ dựa trên ảnh chồng nhau. Không báo hoàn thành cấu tạo khi còn đầu thanh rời hoặc kiểm tra chưa thực hiện.
+- Code C# tùy ý và chỉnh sửa thủ công không tự đi qua các chốt kiểm tra của typed tools: phải chạy kiểm tra sau khi sửa và lưu báo cáo còn thiếu.

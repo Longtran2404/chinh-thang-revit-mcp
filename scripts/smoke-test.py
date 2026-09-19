@@ -33,10 +33,11 @@ def call(identifier, method, params):
 try:
     init = call(1, 'initialize', {'protocolVersion':'2024-11-05','capabilities':{},'clientInfo':{'name':'ctmcp-smoke','version':'1.0'}})
     assert init['serverInfo']['name'] == 'chinh-thang-revit-mcp', init['serverInfo']
+    assert init['serverInfo']['version'] == '1.2.1', init['serverInfo']
     send({'method':'notifications/initialized'})
     result = call(2, 'tools/list', {})
     tools = result['tools']
-    assert len(tools) == 245, len(tools)
+    assert len(tools) == 246, len(tools)
     assert any(t['name']=='revit_get_current_view_info' for t in tools)
     assert any(t['name']=='revit_send_code_to_revit' for t in tools)
     print(json.dumps({'handshake':'PASS','server':init['serverInfo'],'tool_count':len(tools)},ensure_ascii=False))
