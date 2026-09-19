@@ -2,7 +2,7 @@
 # Chinh Thang Revit MCP developer guidance
 
 This is an independent source-build distribution based on bimwright/rvt-mcp.
-244 Revit tools with `--toolsets all` (247 with adaptive bake).
+245 Revit tools with `--toolsets all` (248 with adaptive bake).
 
 - Read LOCAL_SETUP.md and FORK_CHANGES.md before installation changes.
 - Build with scripts/build-local.ps1, which runs tests and disables automatic add-in deployment.

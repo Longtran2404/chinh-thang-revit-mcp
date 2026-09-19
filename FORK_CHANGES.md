@@ -14,6 +14,8 @@ Modified by Minh Long Tran's fork on 2026-09-18, distributed under Apache-2.0.
 
 The Git history retains upstream authorship. Source files with edits carry change notices. Deleted files are recorded in the fork commit.
 
+- 2026-09-19: added checked straight-anchor family placement with geometric diameter/length checks, full-solid concrete containment and atomic dry-run. Added optional editable stiffeners, explicit Moment/Pinned intent and a bounded TCVN 5575:2024 Table 43 bolt-grid checker. These do not certify structural capacity or rigidity. Current surface: 245 standard / 248 adaptive.
+
 - Extended material appearance tools with actual render schema introspection, typed property/bitmap edits, physical texture transforms, private asset duplication and transactional dry-run. Added 14 input-validation cases.
 - Fixed five upstream .NET Framework string-search incompatibilities in Revit 2024 sheet/titleblock handlers.
 - Embedded native editable-family and full material-workflow guidance as an MCP resource.

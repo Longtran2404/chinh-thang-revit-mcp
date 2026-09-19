@@ -3,7 +3,7 @@
 
 > **Trạng thái:** GIAI ĐOẠN 1 — khảo sát tĩnh, chưa sửa code.
 > **Phạm vi:** `rvt-mcp/src/server/Program.cs` và các handler tương ứng trong `src/shared/Handlers/`.
-> **Inventory:** 247 `[McpServerTool]` (244 surface chuẩn + 3 adaptive-bake), 227 tool gọi plugin handler và 5 tool server-local. Hai tool tọa độ read-only thêm sau khảo sát gốc được phân loại bổ sung bên dưới.
+> **Inventory:** 248 `[McpServerTool]` (245 surface chuẩn + 3 adaptive-bake), 227 tool gọi plugin handler và 5 tool server-local. Hai tool tọa độ read-only thêm sau khảo sát gốc được phân loại bổ sung bên dưới.
 
 ## 1. Quy ước đo và ngưỡng
 

@@ -1,3 +1,9 @@
+## Unreleased - checked anchors and stiffeners
+
+- `--toolsets all` **245**, adaptive bake **248**.
+- Explicit anchor diameter, native solid containment and atomic rollback.
+- Editable stiffener components and explicit Moment/Pinned connection intent; no automatic capacity certification.
+
 ## 1.2.0 — 2026-09-18
 
 - Explicit TCVN5574:2018 / EN1992-1-1:2004 anchorage and lap calculations with bounded scope and traceable inputs.

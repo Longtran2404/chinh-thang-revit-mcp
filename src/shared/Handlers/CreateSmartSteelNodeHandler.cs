@@ -20,6 +20,9 @@ namespace RvtMcp.Plugin.Handlers
         }
         public static CommandResult Create(Document d,JObject p)
         {
+            string behavior=SteelDetailInput.Behavior(p);
+            var boltCheck=p["bolt_layout"] is JObject layout?SteelDetailInput.CheckBoltLayout(layout):null;
+            if(boltCheck!=null&&!boltCheck.Value<bool>("passed"))return CommandResult.Fail("TCVN bolt layout failed: "+boltCheck.ToString(Newtonsoft.Json.Formatting.None));
             var first=d.GetElement(RevitCompat.ToElementId(p.Value<long>("primary_id"))) as FamilyInstance;
             var second=d.GetElement(RevitCompat.ToElementId(p.Value<long>("secondary_id"))) as FamilyInstance;
             if(first==null||second==null||first.Id==second.Id)throw new ArgumentException("Two distinct structural I-section family instances required.");
@@ -41,8 +44,15 @@ namespace RvtMcp.Plugin.Handlers
             string kind=den<1e-8?"Splice":column?"BeamToColumn":"BeamToBeam";
             var report=new JObject{["joint_kind"]=kind,["node_mm"]=JArray.FromObject(new[]{node.X*304.8,node.Y*304.8,node.Z*304.8}),["physical_axis_gap_mm"]=pa.DistanceTo(pb)*304.8,["method"]="Centroids of thin physical-solid sections at 25% and 75% of each I member; not bounding-box center.",["plate_center_verified"]=false,["capacity_checked"]=false};
             bool analyze=p.Value<bool?>("analyze_only")??true;
+            report["connection_behavior_requested"]=behavior;
+            report["bolt_layout_check"]=boltCheck;
+            report["bolt_layout_matches_native_connection_verified"]=false;
+            report["rigidity_verified"]=false;
+            report["design_detail_reference"]=p.Value<string>("design_detail_reference");
+            report["stiffeners_requested"]=(p["stiffeners"] as JArray)?.Count??0;
             if(analyze)return CommandResult.Ok(report);
-            long? typeId=p.Value<long?>("connection_type_id")??DetailingStorage.Read(DetailingStorage.Profile(d))?["steel_connection_rules"]?[kind]?.Value<long>();
+            string ruleKey=behavior=="Unspecified"?kind:kind+"_"+behavior;
+            long? typeId=p.Value<long?>("connection_type_id")??DetailingStorage.Read(DetailingStorage.Profile(d))?["steel_connection_rules"]?[ruleKey]?.Value<long>();
             if(!typeId.HasValue)throw new ArgumentException("Save a steel_connection_rules mapping for "+kind+" or provide connection_type_id. No automatic unreviewed connection type selection.");
             var type=d.GetElement(RevitCompat.ToElementId(typeId.Value)) as StructuralConnectionHandlerType;
             if(type==null||!type.IsDetailed()||type.IsGeneric())throw new ArgumentException("The selected type must be a loaded detailed native connection.");
@@ -53,11 +63,16 @@ namespace RvtMcp.Plugin.Handlers
                     tx.Start();tx.SetFailureHandlingOptions(tx.GetFailureHandlingOptions().SetFailuresPreprocessor(new RebarPathFailures()).SetClearAfterRollback(true));
                     var c=StructuralConnectionHandler.Create(d,new List<ElementId>{first.Id,second.Id},type.Id);d.Regenerate();
                     if(c==null)throw new InvalidOperationException("Autodesk connection service returned no connection.");
+                    var stiffeners=CheckedDetailGeometry.Stiffeners(d,p,node);
+                    report["stiffeners"]=stiffeners;
                     DetailingStorage.Write(c,new JObject{["kind"]="SmartSteelNode",["request"]=p.DeepClone(),["node"]=report.DeepClone()});
                     report["created_id"]=dry?(long?)null:RevitCompat.GetId(c.Id);report["dry_run"]=dry;
                     var origin=c.GetOrigin();report["connection_origin_mm"]=JArray.FromObject(new[]{origin.X*304.8,origin.Y*304.8,origin.Z*304.8});
                     report["checks"]="Native connection service controls plate/bolt geometry. Review actual plate centering, offsets, bolts, welds and capacity against the chosen project detail; this is not a Tekla-equivalent design engine.";
                     if(tx.Commit()!=TransactionStatus.Committed)throw new InvalidOperationException("Revit rolled back the connection.");
+                    var failureMethod=c.GetType().GetMethod("GetFailed",Type.EmptyTypes);
+                    if(failureMethod!=null && failureMethod.ReturnType==typeof(bool) && (bool)failureMethod.Invoke(c,null))throw new InvalidOperationException("Native detailed connection generation failed; the whole node was rolled back.");
+                    if(dry)foreach(var item in stiffeners)item["id"]=null;
                 }
                 if(dry)group.RollBack();else group.Assimilate();
             }

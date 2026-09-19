@@ -1,7 +1,7 @@
 <!-- Modified for Chinh Thang Revit MCP, 2026-09-18. See FORK_CHANGES.md. -->
 # Chính Thắng Revit MCP
 
-![MCP tools](https://img.shields.io/badge/MCP-244%20tools-blue)
+![MCP tools](https://img.shields.io/badge/MCP-245%20tools-blue)
 ![License](https://img.shields.io/badge/license-Apache%202.0-green)
 
 MCP chạy cục bộ để kết nối AI client với Autodesk Revit. Bản riêng của **Minh Long Tran / Chính Thắng**, phát triển từ [bimwright/rvt-mcp](https://github.com/bimwright/rvt-mcp).
@@ -38,8 +38,8 @@ Xem thêm [material/PBR](docs/material-appearance.md) và [toàn bộ quy trình
 | Chế độ | Số tools | Ghi chú |
 |---|---:|---|
 | Mặc định | **40** | query, create, view, meta |
-| `--toolsets all` | **244** | Bộ cài bản riêng dùng chế độ này |
-| `all` + adaptive bake | **247** | Thêm quản lý gợi ý; mặc định tắt |
+| `--toolsets all` | **245** | Bộ cài bản riêng dùng chế độ này |
+| `all` + adaptive bake | **248** | Thêm quản lý gợi ý; mặc định tắt |
 
 Dùng `--read-only` nếu chỉ muốn đọc. Đơn vị chiều dài tại biên MCP là mm. AI client vẫn có thể gửi nội dung tool cho dịch vụ AI mà bạn đang sử dụng.
 
@@ -57,7 +57,7 @@ Adaptive bake không có nhà cung cấp rút gọn code được cấu hình s�
 
 ## Kiểm tra
 
-Xem [kết quả kiểm chứng](docs/verification.md): 545 unit tests, build Revit 2024, 244 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
+Xem [kết quả kiểm chứng](docs/verification.md): 545 unit tests, build Revit 2024, 245 tools qua MCP, đọc view thật và kiểm tra Appearance Asset/PBR trên file thử riêng.
 
 ## Giấy phép và nguồn gốc
 

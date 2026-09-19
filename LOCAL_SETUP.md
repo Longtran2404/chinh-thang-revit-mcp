@@ -42,7 +42,7 @@ python scripts/smoke-test.py "$env:LOCALAPPDATA\ChinhThangRevitMcp\app\server\Rv
 python scripts/smoke-test.py "$env:LOCALAPPDATA\ChinhThangRevitMcp\app\server\RvtMcp.Server.exe" --live
 ```
 
-Lệnh đầu kiểm tra handshake và 244 tools. Lệnh `--live` phải trả về view thực trong Revit mới chứng minh kết nối đầu cuối hoạt động. Việc build/test thành công không thay thế bước này.
+Lệnh đầu kiểm tra handshake và 245 tools. Lệnh `--live` phải trả về view thực trong Revit mới chứng minh kết nối đầu cuối hoạt động. Việc build/test thành công không thay thế bước này.
 
 MCP này chạy cục bộ, không yêu cầu khóa API của nhà cung cấp AI. AI client bạn chọn vẫn sử dụng cơ chế tài khoản riêng của client. Adaptive bake mặc định tắt; muốn tự động rút gọn code cần tự cung cấp implementation `ICodeCondenser`.
 

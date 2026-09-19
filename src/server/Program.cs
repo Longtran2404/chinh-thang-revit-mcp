@@ -2486,7 +2486,15 @@ Start with revit_get_current_view_info. Multiple sessions: revit_list_available_
             catch(Exception ex) { return "Error: "+ex.Message; }
         }
 
-        [McpServerTool(Name = "revit_create_smart_steel_node"), System.ComponentModel.Description("Analyze physical centroid axes of two straight I-section members and optionally create native detailed connection from project rules. JSON: primary_id,secondary_id,node_tolerance_mm,analyze_only=true,connection_type_id optional,dry_run=true. Uses actual solid sections for offsets/rotation. Rejects missing service/type or uncertain axes. Plate geometry/capacity requires review; not automatic structural design.")]
+        [McpServerTool(Name = "revit_create_checked_concrete_anchors"), System.ComponentModel.Description("Place editable loaded anchor families; explicit actual cylindrical diameter and full-solid concrete containment, including openings. JSON: host_id,symbol_id,diameter_mm,length_mm,diameter_parameter,length_parameter,positions_mm:[[x,y,z]],axis:[x,y,z] (family local Z),dry_run=true. 1-100 anchors, all-or-nothing. Shared type dimensions must already match. Mark includes diameter and length. Fully contained geometry only: exposed thread, minimum cover and TCVN capacity are not checked. No guessed embedment or automatic sizing.")]
+        public static async Task<string> CreateCheckedConcreteAnchors(string request_json)
+        {
+            var blocked=ServerState.BlockIfReadOnly("create_checked_concrete_anchors");if(blocked!=null)return blocked;
+            try { return JsonConvert.SerializeObject(await ToolGateway.SendToRevit("create_checked_concrete_anchors",new {request_json}),Formatting.Indented); }
+            catch(Exception ex) { return "Error: "+ex.Message; }
+        }
+
+        [McpServerTool(Name = "revit_create_smart_steel_node"), System.ComponentModel.Description("Analyze physical centroid axes of two straight I members; create mapped native detailed connection and optional editable stiffeners atomically. JSON: primary_id,secondary_id,node_tolerance_mm,analyze_only=true,connection_type_id,dry_run=true,connection_behavior:Unspecified|Pinned|Moment,design_detail_reference (required for Moment). Behavior-specific profile key: jointKind_Moment/Pinned. stiffeners:[{symbol_id,offset_mm:[x,y,z] from world node,axis:[x,y,z] for family local Z,width_mm,height_mm,thickness_mm,width_parameter,height_parameter,thickness_parameter}]. Explicit sizes/type; no automatic weld, fit, capacity or rigidity certification.")]
         public static async Task<string> CreateSmartSteelNode(string request_json)
         {
             var blocked=ServerState.BlockIfReadOnly("create_smart_steel_node");if(blocked!=null)return blocked;

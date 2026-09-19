@@ -1,6 +1,6 @@
 {
   "generated_by": "ToolsListSnapshotTests",
-  "tool_count": 247,
+  "tool_count": 248,
   "tools": [
     {
       "name": "revit_accept_bake_suggestion",
@@ -1130,6 +1130,22 @@
           "minY",
           "maxX",
           "maxY"
+        ],
+        "type": "object"
+      }
+    },
+    {
+      "name": "revit_create_checked_concrete_anchors",
+      "description_hash": "sha256:b2396de7bc4d29ecbe4954d1f462bd6c14008fcc69254780e5053b0695c66281",
+      "inputSchema": {
+        "properties": {
+          "request_json": {
+            "description": "",
+            "type": "String"
+          }
+        },
+        "required": [
+          "request_json"
         ],
         "type": "object"
       }
@@ -2290,7 +2306,7 @@
     },
     {
       "name": "revit_create_smart_steel_node",
-      "description_hash": "sha256:86029f44611be0fa685f36bd637ed9b9b8ab169884d08b96c6592b36a80e3ba9",
+      "description_hash": "sha256:4fe68113c532d55ef7fb7c034fc728b7d4f310add37a2be023e377afe4f41e92",
       "inputSchema": {
         "properties": {
           "request_json": {
