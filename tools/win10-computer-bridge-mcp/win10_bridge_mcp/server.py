@@ -16,7 +16,7 @@ from mcp.types import CallToolResult, ImageContent, TextContent
 
 from .policy import CaptureRegistry, normalize_allowlist, validate_mouse
 
-APP_NAME = "Win10 Computer Bridge (local)"
+APP_NAME = "TaskKit.vn Windows Computer Bridge MCP"
 mcp = FastMCP(APP_NAME)
 REGISTRY = CaptureRegistry()
 MOUSE_MUTEX = threading.RLock()
@@ -33,8 +33,8 @@ def load_config() -> dict:
             raise ValueError("Unexpected configuration keys")
         cfg.update(raw)
     cfg["allowed"] = normalize_allowlist(cfg["allow_processes"])
-    if cfg["mouse_control_mode"] not in {"disabled", "foreground_confirm_each"}:
-        raise ValueError("mouse_control_mode must be disabled or foreground_confirm_each")
+    if cfg["mouse_control_mode"] not in {"disabled", "foreground_confirm_each", "foreground_session"}:
+        raise ValueError("mouse_control_mode must be disabled, foreground_confirm_each or foreground_session")
     return cfg
 
 
@@ -49,13 +49,17 @@ def bridge_status() -> dict:
     """Read-only bridge capabilities and safety settings; no mouse movement."""
     cfg = load_config()
     return {
+        "developed_by": "TaskKit.vn - Minh Long Tran",
+        "homepage": "https://taskkit.vn",
         "windows_capture": "PrintWindow (can fail for GPU CAD viewports)",
         "capture_mode": "background, no cursor movement, window must not be minimized",
         "mouse_mode": cfg["mouse_control_mode"],
+        "session_stopped": backend().SESSION_STOP.is_set() if cfg["mouse_control_mode"] == "foreground_session" else None,
         "allowed_processes": sorted(cfg["allowed"]),
         "full_mouse": ["move", "click", "double_click", "drag", "hold", "scroll vertical", "scroll horizontal", "left", "right", "middle", "x1", "x2", "ctrl", "shift", "alt", "space"],
         "concurrent_desktop_mouse": False,
-        "emergency_stop": "Hold F12 during a drag; pressed buttons released in finally",
+        "emergency_stop": "Esc or F12 aborts input; Esc closes preview; buttons released in finally",
+        "local_preview": "show_live_view / close_live_view; Esc stops until preview reopened",
         "note": "For uninterrupted concurrent GUI work use a separate VM/workstation; Revit API MCP is preferred for BIM edits."
     }
 
@@ -64,12 +68,131 @@ def bridge_status() -> dict:
 def inspect_windows() -> dict:
     """List only explicitly allowlisted, non-minimized desktop windows."""
     cfg = load_config()
+    if cfg["mouse_control_mode"] == "foreground_session":
+        require_session(cfg)
     wins = backend().enumerate_windows(cfg["allowed"])
     return {"windows": [
         {"window_id": w.id, "title": w.title, "exe": w.exe,
          "pid": w.pid, "rect": {"x": w.rect.left, "y": w.rect.top,
                               "width": w.rect.width, "height": w.rect.height}}
         for w in wins]}
+
+
+def require_session(cfg):
+    if cfg["mouse_control_mode"] != "foreground_session":
+        raise PermissionError("Owner must explicitly enable foreground_session for semantic actions")
+    native = backend()
+    native.enable_session_stop()
+    native._stop_if_needed()
+    return native
+
+
+@mcp.tool()
+def inspect_controls(window_id: str) -> dict:
+    """Read bounded UI Automation controls of an allowed window; omit passwords."""
+    from . import ui_access
+    cfg = load_config()
+    if cfg["mouse_control_mode"] == "foreground_session":
+        require_session(cfg)
+    win = backend().get_window(window_id, cfg["allowed"])
+    return {"window_id": window_id, "controls": ui_access.inspect(win.hwnd)}
+
+
+@mcp.tool()
+def control_action(window_id: str, capture_id: str, automation_id: str,
+                   action: str, value: str = "", dry_run: bool = True) -> dict:
+    """Set an edit value or invoke an identified button using foreground UI Automation.
+
+    First inspect_controls and capture. action is set_value or invoke. Passwords
+    are excluded. Invocation alone does not certify that a save/open succeeded.
+    """
+    from . import ui_access
+    if action not in {"set_value", "invoke"} or len(value) > 4000:
+        raise ValueError("Unsupported action or value too long")
+    cfg = load_config()
+    native = backend()
+    with MOUSE_MUTEX:
+        win = native.get_window(window_id, cfg["allowed"])
+        REGISTRY.verify(capture_id, window_id, win.rect)
+        if dry_run:
+            return {"dry_run": True, "action": action, "automation_id": automation_id}
+        require_session(cfg)
+        native._activate(win)
+        native._stop_if_needed()
+        REGISTRY.consume(capture_id)
+        if action == "set_value":
+            actual = ui_access.value(win.hwnd, automation_id, value)
+            return {"value_matches": actual == value, "notice": "Capture to verify UI"}
+        ui_access.invoke(win.hwnd, automation_id)
+        return {"invoke_requested": True, "notice": "Verify the resulting UI/file; invocation is not completion"}
+
+
+@mcp.tool()
+def save_notepad_text(window_id: str, capture_id: str, path: str, open_saved: bool = True, dry_run: bool = True) -> dict:
+    """Save current classic Notepad editor text via file API, independently of Save As.
+
+    Only absolute local .txt destinations; never overwrite differing existing data.
+    Verify written text and optionally open the saved file in a new Notepad window.
+    The original editor remains open. Owner-armed foreground_session required.
+    """
+    import subprocess
+    from . import ui_access
+    cfg = load_config()
+    native = backend()
+    target = Path(path)
+    if not target.is_absolute() or str(target).startswith("\\\\") or target.suffix.lower() != ".txt" or not target.parent.is_dir():
+        raise ValueError("Existing local parent directory and absolute .txt path required")
+    with MOUSE_MUTEX:
+        win = native.get_window(window_id, cfg["allowed"])
+        if win.exe != "notepad.exe":
+            raise ValueError("This semantic save only supports classic Notepad")
+        REGISTRY.verify(capture_id, window_id, win.rect)
+        text = ui_access.value(win.hwnd, "15")
+        if len(text) > 1_000_000:
+            raise ValueError("Notepad buffer too large")
+        if dry_run:
+            return {"dry_run": True, "path": str(target), "characters": len(text)}
+        require_session(cfg)
+        REGISTRY.consume(capture_id)
+        if target.exists():
+            if target.read_text(encoding="utf-8-sig") != text:
+                raise FileExistsError("Existing file differs; preserved without overwriting")
+        else:
+            with target.open("x", encoding="utf-8", newline="") as output:
+                output.write(text)
+        matches = target.read_text(encoding="utf-8-sig") == text
+        if not matches:
+            raise RuntimeError("Saved file verification failed")
+        native._stop_if_needed()
+        if open_saved:
+            notepad = Path(os.environ.get("SystemRoot", "C:/Windows")) / "System32/notepad.exe"
+            subprocess.Popen([str(notepad), str(target)])
+        return {"saved_verified": True, "path": str(target), "characters": len(text),
+                "open_requested": open_saved, "method": "Notepad UIA buffer + UTF-8 file API; original remains open"}
+
+
+@mcp.tool()
+def show_live_view(window_id: str) -> dict:
+    """Show a local live preview of one allowed window. Esc closes and stops input.
+
+    Opens a separate Windows window; does not enable physical input or upload frames.
+    Reopening the preview clears its stop latch; existing mouse consent still applies.
+    """
+    from .viewer import show_viewer
+    cfg = load_config()
+    if cfg["mouse_control_mode"] == "foreground_session":
+        require_session(cfg)
+    backend().get_window(window_id, cfg["allowed"])
+    with MOUSE_MUTEX:
+        return show_viewer(window_id, cfg["allowed"])
+
+
+@mcp.tool()
+def close_live_view() -> dict:
+    """Close the local preview and latch an emergency stop for physical input."""
+    from .viewer import close_viewer
+    close_viewer()
+    return {"close_requested": True, "input_stopped": True}
 
 
 @mcp.tool(structured_output=False)
@@ -80,6 +203,8 @@ def capture_window(window_id: str) -> CallToolResult:
     MCP screenshot bytes are transferred to the AI client, not solely kept local.
     """
     cfg = load_config()
+    if cfg["mouse_control_mode"] == "foreground_session":
+        require_session(cfg)
     win = backend().get_window(window_id, cfg["allowed"])
     png, method, blank = backend().capture_window(win)
     if blank:
@@ -155,9 +280,11 @@ def mouse_action(
                     "physical_coordinates": [[sx, sy], [tx, ty]],
                     "mouse_control_mode": cfg["mouse_control_mode"],
                     "note": "No input sent. Set dry_run=false after local owner enables mouse mode."}
-        if cfg["mouse_control_mode"] != "foreground_confirm_each":
+        if cfg["mouse_control_mode"] == "disabled":
             raise PermissionError("Mouse disabled in local config; background capture still works")
-        if not ask_local_consent(summary):
+        if cfg["mouse_control_mode"] == "foreground_session":
+            m.enable_session_stop()
+        if cfg["mouse_control_mode"] == "foreground_confirm_each" and not ask_local_consent(summary):
             return {"performed": False, "reason": "Owner declined local Windows consent"}
         refreshed = m.get_window(window_id, cfg["allowed"])
         REGISTRY.verify(capture_id, refreshed.id, refreshed.rect)
@@ -169,15 +296,112 @@ def mouse_action(
 
 
 @mcp.tool()
+def type_text(window_id: str, capture_id: str, text: str, dry_run: bool = True, replace_all: bool = False) -> dict:
+    """Type bounded Unicode text in an allowed foreground window after local consent.
+
+    Click the intended editor first and capture again. Text is literal, no shortcuts.
+    Esc/F12 stops. Default dry run. Same physical-input config and consent as mouse.
+    replace_all=True explicitly selects all text in the focused editor and replaces it.
+    """
+    if not isinstance(text, str) or not 1 <= len(text) <= 2000:
+        raise ValueError("Text must contain 1 to 2000 characters")
+    if any(ord(c) < 32 or ord(c) == 127 for c in text):
+        raise ValueError("Control characters are not supported; type literal single-line text")
+    text.encode("utf-16-le")
+    cfg = load_config()
+    native = backend()
+    with MOUSE_MUTEX:
+        win = native.get_window(window_id, cfg["allowed"])
+        REGISTRY.verify(capture_id, window_id, win.rect)
+        summary = f"{win.exe} | {win.title[:80]}\nType {len(text)} characters (replace all={replace_all}): {text[:160]}"
+        if dry_run:
+            return {"dry_run": True, "summary": summary}
+        if cfg["mouse_control_mode"] == "disabled":
+            raise PermissionError("Physical input disabled in local config")
+        if cfg["mouse_control_mode"] == "foreground_session":
+            native.enable_session_stop()
+        if cfg["mouse_control_mode"] == "foreground_confirm_each" and not ask_local_consent(summary):
+            return {"performed": False, "reason": "Owner declined local Windows consent"}
+        current = native.get_window(window_id, cfg["allowed"])
+        REGISTRY.verify(capture_id, window_id, current.rect)
+        REGISTRY.consume(capture_id)
+        native.apply_text(current, text, replace_all=replace_all)
+        return {"performed": True, "characters": len(text), "notice": "Capture again to verify editor contents"}
+
+
+@mcp.tool()
+def press_key(window_id: str, capture_id: str, key: str, dry_run: bool = True) -> dict:
+    """Press one bounded key or chord, e.g. ctrl+s, ctrl+l, enter, tab, alt+n.
+
+    Only listed keys are accepted; Windows/system keys and Esc are excluded.
+    Physical Esc is reserved for stopping the authorized session.
+    Capture and verify the resulting UI before the next action.
+    """
+    cfg = load_config()
+    native = backend()
+    parts = tuple(key.lower().split("+"))
+    if not 1 <= len(parts) <= 4 or len(set(parts)) != len(parts) or any(k not in native.KEY_CODES for k in parts):
+        raise ValueError("Unsupported key chord")
+    if len(parts) > 1 and (any(k not in {"ctrl", "shift", "alt"} for k in parts[:-1]) or parts[-1] in {"ctrl", "shift", "alt"}):
+        raise ValueError("Use modifier(s)+one key")
+    with MOUSE_MUTEX:
+        win = native.get_window(window_id, cfg["allowed"])
+        REGISTRY.verify(capture_id, window_id, win.rect)
+        if dry_run:
+            return {"dry_run": True, "key": key, "window_id": window_id}
+        if cfg["mouse_control_mode"] == "disabled":
+            raise PermissionError("Physical input disabled in local config")
+        if cfg["mouse_control_mode"] == "foreground_session":
+            native.enable_session_stop()
+        if cfg["mouse_control_mode"] == "foreground_confirm_each" and not ask_local_consent(f"{win.exe} | {win.title[:80]}\nPress {key}"):
+            return {"performed": False, "reason": "Owner declined"}
+        current = native.get_window(window_id, cfg["allowed"])
+        REGISTRY.verify(capture_id, window_id, current.rect)
+        REGISTRY.consume(capture_id)
+        native.apply_keys(current, parts)
+        return {"performed": True, "key": key, "notice": "Capture again to verify"}
+
+
+@mcp.tool()
+def list_drives() -> dict:
+    """Read existing local drive roots, for choosing an Explorer destination."""
+    import string
+    return {"drives": [f"{letter}:\\" for letter in string.ascii_uppercase if Path(f"{letter}:\\").is_dir()]}
+
+
+@mcp.tool()
+def open_directory(path: str) -> dict:
+    """Open an existing absolute local directory in Windows Explorer.
+
+    Requires explorer.exe explicitly allowed and foreground_session mode.
+    No files/executables/URLs/UNC destinations; Esc stops this action too.
+    """
+    cfg = load_config()
+    if cfg["mouse_control_mode"] != "foreground_session" or "explorer.exe" not in cfg["allowed"]:
+        raise PermissionError("Owner must enable foreground_session and allow explorer.exe")
+    target = Path(path)
+    if not target.is_absolute() or str(target).startswith("\\\\") or not target.is_dir():
+        raise ValueError("Existing absolute local directory required")
+    native = backend()
+    native.enable_session_stop()
+    native._stop_if_needed()
+    os.startfile(str(target.resolve()))
+    return {"open_requested": True, "path": str(target.resolve()), "notice": "Inspect windows and capture Explorer to verify"}
+
+
+@mcp.tool()
 def emergency_release() -> dict:
     """Best-effort release of any injected mouse buttons and modifiers; no dialog."""
+    backend().SESSION_STOP.set()
     backend().release_all()
-    return {"released": True, "note": "Best-effort; hold F12 during drags as emergency interrupt"}
+    return {"released": True, "note": "Best-effort; Esc/F12 interrupts physical actions"}
 
 
 def main() -> None:
     # Read config at startup so malformed settings fail fast.
-    load_config()
+    cfg = load_config()
+    if cfg["mouse_control_mode"] == "foreground_session":
+        backend().enable_session_stop()
     mcp.run(transport="stdio")
 
 

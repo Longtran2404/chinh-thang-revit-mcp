@@ -1,0 +1,13 @@
+TaskKit.vn Windows Computer Bridge MCP
+Copyright 2026 Minh Long Tran (TaskKit.vn).
+Developed by TaskKit.vn - https://taskkit.vn
+Licensed under the Apache License, Version 2.0.
+
+This Windows bridge is distributed within Chinh Thang Revit MCP.
+The repository is based on rvt-mcp by bimwright / Khoa Le.
+Upstream: https://github.com/bimwright/rvt-mcp
+Copyright 2026 Khoa Le. Original license and applicable source notices
+are retained in the repository LICENSE and NOTICE.
+
+This project is independent and is not endorsed by OpenAI, Autodesk,
+Microsoft, or bimwright. Product names belong to their respective owners.

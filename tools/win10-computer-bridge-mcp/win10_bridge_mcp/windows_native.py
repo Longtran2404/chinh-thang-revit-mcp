@@ -12,6 +12,7 @@ from io import BytesIO
 from pathlib import Path
 import sys
 import time
+import threading
 
 from PIL import Image as PILImage
 from .policy import Rect, drag_points, MAX_CAPTURE_PIXELS
@@ -93,6 +94,10 @@ U.SendInput.argtypes = (wt.UINT, ct.POINTER(INPUT), ct.c_int)
 U.SendInput.restype = wt.UINT
 U.GetAsyncKeyState.argtypes = (ct.c_int,)
 U.GetAsyncKeyState.restype = wt.SHORT
+U.WindowFromPoint.argtypes = (POINT,)
+U.WindowFromPoint.restype = wt.HWND
+U.GetAncestor.argtypes = (wt.HWND, wt.UINT)
+U.GetAncestor.restype = wt.HWND
 
 K.OpenProcess.argtypes = (wt.DWORD, wt.BOOL, wt.DWORD)
 K.OpenProcess.restype = wt.HANDLE
@@ -115,6 +120,7 @@ PROCESS_QUERY_LIMITED_INFORMATION = 0x1000
 INPUT_MOUSE = 0
 INPUT_KEYBOARD = 1
 KEYEVENTF_KEYUP = 0x0002
+KEYEVENTF_UNICODE = 0x0004
 MOUSE_LEFT_DOWN, MOUSE_LEFT_UP = 0x0002, 0x0004
 MOUSE_RIGHT_DOWN, MOUSE_RIGHT_UP = 0x0008, 0x0010
 MOUSE_MIDDLE_DOWN, MOUSE_MIDDLE_UP = 0x0020, 0x0040
@@ -128,6 +134,27 @@ BUTTON_FLAGS = {
     "x2": (MOUSE_X_DOWN, MOUSE_X_UP, 2),
 }
 KEYS = {"ctrl": 0x11, "shift": 0x10, "alt": 0x12, "space": 0x20}
+SESSION_STOP = threading.Event()
+_session_watcher = None
+_session_lock = threading.Lock()
+
+
+def enable_session_stop() -> None:
+    """Owner-armed session, without per-action dialogs. Esc permanently latches stop."""
+    global _session_watcher
+    with _session_lock:
+        if _session_watcher is not None:
+            return  # Never clear a stopped session remotely.
+        if U.GetAsyncKeyState(0x1B) & 0x8000 or U.GetAsyncKeyState(0x7B) & 0x8000:
+            SESSION_STOP.set()
+        def watch():
+            while not SESSION_STOP.is_set():
+                if U.GetAsyncKeyState(0x1B) & 0x8001 or U.GetAsyncKeyState(0x7B) & 0x8001:
+                    SESSION_STOP.set()
+                    return
+                SESSION_STOP.wait(0.02)
+        _session_watcher = threading.Thread(target=watch, daemon=True)
+        _session_watcher.start()
 
 
 @dataclass(frozen=True)
@@ -262,8 +289,12 @@ def _mouse(flags: int, data: int = 0) -> None:
 
 
 def _key(name: str, is_down: bool) -> None:
+    _virtual_key(KEYS[name], is_down)
+
+
+def _virtual_key(vk: int, is_down: bool) -> None:
     inp = INPUT(type=INPUT_KEYBOARD)
-    inp.payload.ki.wVk = KEYS[name]
+    inp.payload.ki.wVk = vk
     inp.payload.ki.dwFlags = 0 if is_down else KEYEVENTF_KEYUP
     _send(inp)
 
@@ -273,9 +304,84 @@ def _position(x: int, y: int) -> None:
         raise OSError(f"SetCursorPos failed: {ct.get_last_error()}")
 
 
+def _verify_hit(win: Window, x: int, y: int) -> None:
+    hit = U.WindowFromPoint(POINT(x, y))
+    if not hit or U.GetAncestor(hit, 2) != win.hwnd:
+        raise RuntimeError("Point is covered by another window; refusing input")
+
+
+KEY_CODES = {"ctrl": 0x11, "shift": 0x10, "alt": 0x12, "enter": 0x0D,
+             "tab": 0x09, "space": 0x20, "backspace": 0x08, "delete": 0x2E,
+             "left": 0x25, "up": 0x26, "right": 0x27, "down": 0x28,
+             "home": 0x24, "end": 0x23, "pageup": 0x21, "pagedown": 0x22,
+             **{chr(c).lower(): c for c in range(65, 91)},
+             **{str(c): ord(str(c)) for c in range(10)}}
+
+
+def apply_keys(win: Window, keys: tuple[str, ...]) -> None:
+    _stop_if_needed()
+    _activate(win)
+    pressed = []
+    try:
+        for key in keys:
+            _stop_if_needed()
+            if U.GetForegroundWindow() != win.hwnd:
+                raise RuntimeError("Target lost focus during keyboard action")
+            _virtual_key(KEY_CODES[key], True)
+            pressed.append(KEY_CODES[key])
+        _interruptible_wait(0.06)
+    finally:
+        for vk in reversed(pressed):
+            try: _virtual_key(vk, False)
+            except Exception: pass
+        _release_all()
+
+
 def _stop_if_needed() -> None:
-    if U.GetAsyncKeyState(0x7B) & 0x8000:  # F12 abort
-        raise InterruptedError("F12 emergency abort")
+    from .viewer import stopped
+    if U.GetAsyncKeyState(0x1B) & 0x8001 or U.GetAsyncKeyState(0x7B) & 0x8001:
+        SESSION_STOP.set()
+    if SESSION_STOP.is_set() or stopped():
+        raise InterruptedError("Esc/F12 emergency abort or preview closed")
+
+
+def _interruptible_wait(seconds: float) -> None:
+    end = time.monotonic() + seconds
+    while time.monotonic() < end:
+        _stop_if_needed()
+        time.sleep(min(0.02, max(0, end - time.monotonic())))
+
+
+def apply_text(win: Window, text: str, replace_all: bool = False) -> None:
+    """Bounded Unicode input; stop/focus checked before every UTF-16 unit."""
+    _stop_if_needed()
+    _activate(win)
+    try:
+        if replace_all:
+            _stop_if_needed()
+            _key("ctrl", True)
+            _virtual_key(0x41, True)
+            _virtual_key(0x41, False)
+            _key("ctrl", False)
+            _interruptible_wait(0.04)
+        encoded = text.encode("utf-16-le")
+        for offset in range(0, len(encoded), 2):
+            _stop_if_needed()
+            if U.GetForegroundWindow() != win.hwnd:
+                raise RuntimeError("Target lost focus during typing")
+            unit = int.from_bytes(encoded[offset:offset + 2], "little")
+            inp = INPUT(type=INPUT_KEYBOARD)
+            inp.payload.ki.wScan = unit
+            inp.payload.ki.dwFlags = KEYEVENTF_UNICODE
+            _send(inp)
+            inp.payload.ki.dwFlags = KEYEVENTF_UNICODE | KEYEVENTF_KEYUP
+            _send(inp)
+    finally:
+        try:
+            if replace_all:
+                _virtual_key(0x41, False)
+        finally:
+            _release_all()
 
 
 def _release_all() -> None:
@@ -293,10 +399,13 @@ def release_all() -> None:
 
 
 def _activate(win: Window) -> None:
-    if not U.SetForegroundWindow(win.hwnd):
-        # OS may reject focus stealing. Stop rather than click the wrong app.
-        raise RuntimeError("Cannot activate target; bring it to foreground manually")
-    time.sleep(0.10)
+    if U.GetForegroundWindow() != win.hwnd:
+        U.SetForegroundWindow(win.hwnd)
+    _interruptible_wait(0.10)
+    if U.GetForegroundWindow() != win.hwnd:
+        from . import ui_access
+        ui_access.focus_window(win.hwnd)
+        _interruptible_wait(0.10)
     if U.GetForegroundWindow() != win.hwnd:
         raise RuntimeError("Foreground changed: refuse mouse action")
 
@@ -311,12 +420,14 @@ def apply_mouse(win: Window, action: str, button: str, x: int, y: int,
     sx, sy = win.rect.absolute(x, y)
     ex, ey = win.rect.absolute(end_x, end_y)
     down, up, mouse_data = BUTTON_FLAGS[button]
+    _stop_if_needed()
     _activate(win)
     try:
         _stop_if_needed()
         for m in modifiers:
             _key(m, True)
         _position(sx, sy)
+        _verify_hit(win, sx, sy)
         if action == "move":
             return
         if action in ("click", "double_click"):
@@ -339,7 +450,8 @@ def apply_mouse(win: Window, action: str, button: str, x: int, y: int,
                     if U.GetForegroundWindow() != win.hwnd:
                         raise RuntimeError("Target lost focus during drag")
                     _position(px, py)
-                    time.sleep(sleep_s)
+                    _verify_hit(win, px, py)
+                    _interruptible_wait(sleep_s)
             else:
                 endtime = time.monotonic() + duration_ms / 1000
                 while time.monotonic() < endtime:

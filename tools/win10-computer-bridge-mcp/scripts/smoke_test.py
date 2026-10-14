@@ -15,7 +15,9 @@ async def main():
             names = sorted(t.name for t in listed.tools)
             print("MCP TOOLS:", ", ".join(names))
             assert {"bridge_status", "inspect_windows", "capture_window",
-                    "mouse_action", "emergency_release"} <= set(names)
+                    "mouse_action", "emergency_release", "show_live_view", "close_live_view",
+                    "type_text", "press_key", "inspect_controls", "control_action",
+                    "open_directory", "list_drives", "save_notepad_text"} <= set(names)
             result = await session.call_tool("bridge_status")
             print("STATUS:", [getattr(c, "text", None) for c in result.content])
 

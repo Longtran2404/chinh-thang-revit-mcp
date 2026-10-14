@@ -5,3 +5,6 @@ __pycache__/
 *.png
 bridge_config.json
 *.log
+*.egg-info/
+build/
+dist/
